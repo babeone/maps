@@ -389,8 +389,9 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
     public void onMapReady(final MapboxMap mapboxMap) {
         mMap = mapboxMap;
 
-        mMap.setStyle(new Style.Builder().fromUrl(mStyleURL));
-
+        //mMap.setStyle(new Style.Builder().fromUrl(mStyleURL));
+        mMap.setStyle(new Style.Builder().fromJson(mStyleURL));
+            
         reflow();
 
         mMap.getStyle(new Style.OnStyleLoaded() {
