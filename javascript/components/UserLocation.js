@@ -29,7 +29,7 @@ const layerStyles = {
   },
 };
 
-const normalIcon = [
+export const normalIcon = [
   <CircleLayer
     key="mapboxUserLocationPluseCircle"
     id="mapboxUserLocationPluseCircle"
@@ -51,7 +51,7 @@ const normalIcon = [
 class UserLocation extends React.Component {
   static propTypes = {
     /**
-     * Wheather location icon is animated between updates
+     * Whether location icon is animated between updates
      */
     animated: PropTypes.bool,
 
@@ -63,7 +63,7 @@ class UserLocation extends React.Component {
     renderMode: PropTypes.oneOf(['normal', 'custom']),
 
     /**
-     * Wheather location icon is visible
+     * Whether location icon is visible
      */
     visible: PropTypes.bool,
 
@@ -77,6 +77,8 @@ class UserLocation extends React.Component {
      */
     onUpdate: PropTypes.func,
 
+    minDisplacement: PropTypes.number,
+
     /**
      * Custom location icon of type mapbox-gl-native components
      */
@@ -86,6 +88,7 @@ class UserLocation extends React.Component {
   static defaultProps = {
     animated: true,
     visible: true,
+    minDisplacement: 0,
     renderMode: 'normal',
   };
 
@@ -105,17 +108,42 @@ class UserLocation extends React.Component {
     this._onLocationUpdate = this._onLocationUpdate.bind(this);
   }
 
+  // required as #setLocationManager attempts to setState
+  // after component unmount
+  _isMounted = null;
+
+  locationManagerRunning = false;
+
   async componentDidMount() {
+    this._isMounted = true;
     locationManager.addListener(this._onLocationUpdate);
     await this.setLocationManager({
       running: this.needsLocationManagerRunning(),
     });
+
+    locationManager.setMinDisplacement(this.props.minDisplacement);
   }
 
-  locationManagerRunning = false;
+  async componentDidUpdate(prevProps) {
+    await this.setLocationManager({
+      running: this.needsLocationManagerRunning(),
+    });
+
+    if (this.props.minDisplacement !== prevProps.minDisplacement) {
+      locationManager.setMinDisplacement(this.props.minDisplacement);
+    }
+  }
+
+  async componentWillUnmount() {
+    this._isMounted = false;
+
+    locationManager.removeListener(this._onLocationUpdate);
+    await this.setLocationManager({running: false});
+  }
 
   /**
-   * Wheather to start or stop the locationManager
+   * Whether to start or stop the locationManager
+   *
    * Notice, that locationManager will start automatically when
    * either `onUpdate` or `visible` are set
    *
@@ -130,11 +158,13 @@ class UserLocation extends React.Component {
 
         const lastKnownLocation = await locationManager.getLastKnownLocation();
 
-        if (lastKnownLocation) {
+        if (lastKnownLocation && this._isMounted) {
           this.setState({
             coordinates: this._getCoordinatesFromLocation(lastKnownLocation),
           });
         }
+      } else if (!running) {
+        locationManager.stop();
       }
     }
   };
@@ -143,15 +173,10 @@ class UserLocation extends React.Component {
    *
    * If locationManager should be running
    *
-   * @return {void}
+   * @return {boolean}
    */
   needsLocationManagerRunning() {
-    return this.props.onUpdate || this.props.visible;
-  }
-
-  async componentWillUnmount() {
-    locationManager.removeListener(this._onLocationUpdate);
-    await this.setLocationManager({running: false});
+    return !!this.props.onUpdate || this.props.visible;
   }
 
   _onLocationUpdate(location) {
@@ -180,12 +205,6 @@ class UserLocation extends React.Component {
     }
   }
 
-  async componentDidUpdate() {
-    await this.setLocationManager({
-      running: this.needsLocationManagerRunning(),
-    });
-  }
-
   render() {
     if (!this.props.visible || !this.state.coordinates) {
       return null;
@@ -209,8 +228,3 @@ class UserLocation extends React.Component {
 }
 
 export default UserLocation;
-
-// TODO:
-// * why is there even a RenderMode if children are rendered regardless?
-// * why is #userIconLayers a getter?!
-// * state.shouldShowUserLocation is unused

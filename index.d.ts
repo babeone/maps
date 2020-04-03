@@ -107,7 +107,7 @@ declare namespace MapboxGL {
 
   const offlineManager: OfflineManager;
   const snapshotManager: SnapshotManager;
-  
+
   /**
    * GeoUtils
    */
@@ -243,7 +243,7 @@ declare namespace MapboxGL {
     ): void;
     deletePack(name: string): Promise<void>;
     getPacks(): Promise<Array<OfflinePack>>;
-    getPack(name: string): Promise<OfflinePack>;
+    getPack(name: string): Promise<OfflinePack | undefined>;
     resetDatabase(): Promise<void>;
     setTileCountLimit(limit: number): void;
     setProgressEventThrottle(throttleValue: number): void;
@@ -263,9 +263,20 @@ declare namespace MapboxGL {
     name: string,
     bounds: [GeoJSON.Position, GeoJSON.Position];
     metadata: any;
-    status: () => any,
-    resume: () => any,
-    pause: () => any,
+    status: () => Promise<OfflinePackStatus>,
+    resume: () => Promise<void>,
+    pause: () => Promise<void>,
+  }
+
+  interface OfflinePackStatus {
+    name: string,
+    state: number,
+    percentage: number,
+    completedResourceCount: number,
+    completedResourceSize: number,
+    completedTileSize: number,
+    completedTileCount: number,
+    requiredResourceCount: number,
   }
 
   /**
@@ -410,6 +421,7 @@ export interface UserLocationProps {
   onPress?: () => void;
   onUpdate?: (location: MapboxGL.Location) => void;
   children?: ReactNode;
+  minDisplacement?: number;
 }
 
 export type WithExpression<T> = {
@@ -640,7 +652,7 @@ export interface PointAnnotationProps {
 }
 
 export interface CalloutProps extends Omit<ViewProps, 'style'> {
-  title?: string;
+  title: string;
   style?: StyleProp<WithExpression<ViewStyle>>;
   containerStyle?: StyleProp<WithExpression<ViewStyle>>;
   contentStyle?: StyleProp<WithExpression<ViewStyle>>;
@@ -747,7 +759,7 @@ export interface ImageSourceProps extends ViewProps {
 
 export interface OfflineCreatePackOptions {
   name?: string;
-  styleURL?: MapboxGL.StyleURL;
+  styleURL?: string;
   bounds?: [GeoJSON.Position, GeoJSON.Position];
   minZoom?: number;
   maxZoom?: number;
@@ -761,7 +773,7 @@ export interface SnapshotOptions {
   zoomLevel?: number;
   pitch?: number;
   heading?: number;
-  styleURL?: MapboxGL.StyleURL;
+  styleURL?: string;
   writeToDisk?: boolean;
 }
 

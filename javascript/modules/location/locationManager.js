@@ -12,17 +12,28 @@ class LocationManager {
     this._listeners = [];
     this._lastKnownLocation = null;
     this._isListening = false;
-    this._isPaused = false;
     this.onUpdate = this.onUpdate.bind(this);
   }
 
   async getLastKnownLocation() {
     if (!this._lastKnownLocation) {
-      const lastKnownLocation = await MapboxGLLocationManager.getLastKnownLocation();
+      let lastKnownLocation;
+
+      // as location can be brittle it might happen,
+      // that we get an exception from native land
+      // let's silently catch it and simply log out
+      // instead of throwing an exception
+      try {
+        lastKnownLocation = await MapboxGLLocationManager.getLastKnownLocation();
+      } catch (error) {
+        console.log('locationManager Error: ', error);
+      }
+
       if (!this._lastKnownLocation && lastKnownLocation) {
         this._lastKnownLocation = lastKnownLocation;
       }
     }
+
     return this._lastKnownLocation;
   }
 
@@ -44,15 +55,9 @@ class LocationManager {
     this._listeners = [];
   }
 
-  start() {
-    if (this._isPaused) {
-      MapboxGLLocationManager.start();
-      this._isPaused = false;
-      return;
-    }
-
+  start(displacement = 0) {
     if (!this._isListening) {
-      MapboxGLLocationManager.start();
+      MapboxGLLocationManager.start(displacement);
 
       LocationModuleEventEmitter.addListener(
         MapboxGL.LocationCallbackName.Update,
@@ -63,14 +68,7 @@ class LocationManager {
     }
   }
 
-  pause() {
-    if (!this._isPaused && this._isListening) {
-      MapboxGLLocationManager.pause();
-      this._isListening = false;
-    }
-  }
-
-  dispose() {
+  stop() {
     MapboxGLLocationManager.stop();
 
     if (this._isListening) {
@@ -83,12 +81,14 @@ class LocationManager {
     this._isListening = false;
   }
 
+  setMinDisplacement(minDisplacement) {
+    MapboxGLLocationManager.setMinDisplacement(minDisplacement);
+  }
+
   onUpdate(location) {
     this._lastKnownLocation = location;
 
-    for (const listener of this._listeners) {
-      listener(location);
-    }
+    this._listeners.forEach(l => l(location));
   }
 }
 

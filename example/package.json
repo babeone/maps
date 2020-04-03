@@ -1,6 +1,6 @@
 {
   "name": "RNMapboxGLExample",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "android": "react-native run-android",
@@ -24,6 +24,7 @@
     "@turf/bearing": "^5.1.5",
     "@turf/distance": "^5.1.5",
     "@turf/helpers": "^4.7.3",
+    "@turf/length": "^6.0.2",
     "@turf/line-distance": "^4.7.3",
     "@turf/nearest": "^4.7.3",
     "buffer": "^5.1.0",
@@ -44,13 +45,16 @@
     "@babel/runtime": "^7.6.2",
     "@react-native-community/eslint-config": "^0.0.5",
     "babel-jest": "^24.9.0",
-    "eslint": "^6.4.0",
+    "eslint": "^6.8.0",
     "jest": "^24.9.0",
     "jetifier": "^1.6.4",
     "metro-react-native-babel-preset": "^0.56.0",
     "react-test-renderer": "16.9.0"
   },
   "jest": {
-    "preset": "react-native"
+    "preset": "react-native",
+    "setupFilesAfterEnv": [
+      "../setup-jest"
+    ]
   }
 }

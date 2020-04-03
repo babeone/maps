@@ -9,6 +9,7 @@ describe('Public Interface', () => {
       'StyleSheet',
       'Light',
       'PointAnnotation',
+      'MarkerView',
       'Annotation',
       'Callout',
       'Camera',
@@ -74,14 +75,15 @@ describe('Public Interface', () => {
       'setConnected',
       'requestAndroidLocationPermissions',
 
-      // utils
-      'geoUtils',
-
       // animated
       'Animated',
 
       // helpers
       'AnimatedPoint',
+      'AnimatedCoordinatesArray',
+      'AnimatedShape',
+      'AnimatedExtractCoordinateFromArray',
+      'AnimatedRouteCoordinatesArray',
     ];
     actualKeys.forEach(key => expect(expectedKeys).toContain(key));
   });

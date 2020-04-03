@@ -1,6 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {requireNativeComponent, StyleSheet} from 'react-native';
+import {
+  requireNativeComponent,
+  StyleSheet,
+  findNodeHandle,
+  UIManager,
+} from 'react-native';
 
 import {toJSONString, isFunction, viewPropTypes} from '../utils';
 import {makePoint} from '../utils/geoUtils';
@@ -16,7 +21,8 @@ const styles = StyleSheet.create({
 });
 
 /**
- * PointAnnotation represents a one-dimensional shape located at a single geographical coordinate. PointAnnotation is legacy, soon to be deprecated, and should use ShapeSource and SymbolLayer instead.
+ * PointAnnotation represents a one-dimensional shape located at a single geographical coordinate. Consider using ShapeSource and SymbolLayer instead, if you have many points and you have static images, they'll offer much better performance.
+ * If you need interctive views please use MarkerView, as with PointAnnotation on android child views are rendered onto a bitmap for better performance.
  */
 class PointAnnotation extends React.PureComponent {
   static propTypes = {
@@ -128,6 +134,17 @@ class PointAnnotation extends React.PureComponent {
       return;
     }
     return toJSONString(makePoint(this.props.coordinate));
+  }
+
+  /**
+   * On android point annotation is rendered offscreen with a canvas into an image.
+   * To rerender the image from the current state of the view call refresh.
+   * Call this for example from Image#onLoad.
+   */
+  refresh() {
+    if (Platform.OS === 'android') {
+      UIManager.dispatchViewManagerCommand(findNodeHandle(this), 'refresh', []);
+    }
   }
 
   render() {

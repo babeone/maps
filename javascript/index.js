@@ -1,7 +1,10 @@
-import {Animated, NativeModules, PermissionsAndroid} from 'react-native';
+import {
+  Animated as RNAnimated,
+  NativeModules,
+  PermissionsAndroid,
+} from 'react-native';
 
 import {isAndroid} from './utils';
-import * as geoUtils from './utils/geoUtils';
 import MapView from './components/MapView';
 import Light from './components/Light';
 import PointAnnotation from './components/PointAnnotation';
@@ -25,7 +28,12 @@ import BackgroundLayer from './components/BackgroundLayer';
 import locationManager from './modules/location/locationManager';
 import offlineManager from './modules/offline/offlineManager';
 import snapshotManager from './modules/snapshot/snapshotManager';
-import AnimatedMapPoint from './utils/AnimatedPoint';
+import MarkerView from './components/MarkerView';
+import AnimatedMapPoint from './utils/animated/AnimatedPoint';
+import AnimatedShape from './utils/animated/AnimatedShape';
+import AnimatedCoordinatesArray from './utils/animated/AnimatedCoordinatesArray';
+import AnimatedExtractCoordinateFromArray from './utils/animated/AnimatedExtractCoordinateFromArray';
+import AnimatedRouteCoordinatesArray from './utils/animated/AnimatedRouteCoordinatesArray';
 
 const MapboxGL = {...NativeModules.MGLModule};
 
@@ -66,6 +74,7 @@ MapboxGL.Camera = Camera;
 
 // annotations
 MapboxGL.Annotation = Annotation;
+MapboxGL.MarkerView = MarkerView;
 
 // sources
 MapboxGL.VectorSource = VectorSource;
@@ -90,23 +99,68 @@ MapboxGL.offlineManager = offlineManager;
 MapboxGL.snapshotManager = snapshotManager;
 
 // utils
-MapboxGL.geoUtils = geoUtils;
 MapboxGL.AnimatedPoint = AnimatedMapPoint;
+MapboxGL.AnimatedCoordinatesArray = AnimatedCoordinatesArray;
+MapboxGL.AnimatedExtractCoordinateFromArray = AnimatedExtractCoordinateFromArray;
+MapboxGL.AnimatedRouteCoordinatesArray = AnimatedRouteCoordinatesArray;
+MapboxGL.AnimatedShape = AnimatedShape;
 
 // animated
-MapboxGL.Animated = {
+const Animated = {
   // sources
-  ShapeSource: Animated.createAnimatedComponent(ShapeSource),
-  ImageSource: Animated.createAnimatedComponent(ImageSource),
+  ShapeSource: RNAnimated.createAnimatedComponent(ShapeSource),
+  ImageSource: RNAnimated.createAnimatedComponent(ImageSource),
 
   // layers
-  FillLayer: Animated.createAnimatedComponent(FillLayer),
-  FillExtrusionLayer: Animated.createAnimatedComponent(FillExtrusionLayer),
-  LineLayer: Animated.createAnimatedComponent(LineLayer),
-  CircleLayer: Animated.createAnimatedComponent(CircleLayer),
-  SymbolLayer: Animated.createAnimatedComponent(SymbolLayer),
-  RasterLayer: Animated.createAnimatedComponent(RasterLayer),
-  BackgroundLayer: Animated.createAnimatedComponent(BackgroundLayer),
+  FillLayer: RNAnimated.createAnimatedComponent(FillLayer),
+  FillExtrusionLayer: RNAnimated.createAnimatedComponent(FillExtrusionLayer),
+  LineLayer: RNAnimated.createAnimatedComponent(LineLayer),
+  CircleLayer: RNAnimated.createAnimatedComponent(CircleLayer),
+  SymbolLayer: RNAnimated.createAnimatedComponent(SymbolLayer),
+  RasterLayer: RNAnimated.createAnimatedComponent(RasterLayer),
+  BackgroundLayer: RNAnimated.createAnimatedComponent(BackgroundLayer),
+
+  // values
+  CoordinatesArray: AnimatedCoordinatesArray,
+  RouteCoordinatesArray: AnimatedRouteCoordinatesArray,
+  Shape: AnimatedShape,
+  ExtractCoordinateFromArray : AnimatedExtractCoordinateFromArray, 
+};
+
+MapboxGL.Animated = Animated;
+
+const {LineJoin} = MapboxGL;
+
+export {
+  MapView,
+  Light,
+  PointAnnotation,
+  Callout,
+  UserLocation,
+  Camera,
+  Annotation,
+  MarkerView,
+  VectorSource,
+  ShapeSource,
+  RasterSource,
+  ImageSource,
+  Images,
+  FillLayer,
+  FillExtrusionLayer,
+  HeatmapLayer,
+  LineLayer,
+  CircleLayer,
+  SymbolLayer,
+  RasterLayer,
+  BackgroundLayer,
+  locationManager,
+  offlineManager,
+  snapshotManager,
+  AnimatedMapPoint,
+  AnimatedCoordinatesArray,
+  AnimatedShape,
+  Animated,
+  LineJoin,
 };
 
 export default MapboxGL;

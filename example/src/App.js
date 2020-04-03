@@ -4,6 +4,7 @@ import {StyleSheet, Text, View, YellowBox} from 'react-native';
 import SafeAreaView from 'react-native-safe-area-view';
 import {createStackNavigator} from 'react-navigation';
 import CardStackStyleInterpolator from 'react-navigation-stack/dist/views/StackView/StackViewStyleInterpolator'; // eslint-disable-line import/no-extraneous-dependencies
+import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import sheet from './styles/sheet';
 import colors from './styles/colors';
@@ -26,6 +27,8 @@ const styles = StyleSheet.create({
 });
 
 MapboxGL.setAccessToken(config.get('accessToken'));
+
+Icon.loadFont();
 
 const AppStackNavigator = createStackNavigator(
   {
@@ -75,8 +78,7 @@ class App extends React.Component {
       return (
         <SafeAreaView
           style={[sheet.matchParent, {backgroundColor: colors.primary.blue}]}
-          forceInset={{top: 'always'}}
-        >
+          forceInset={{top: 'always'}}>
           <View style={sheet.matchParent}>
             <Text style={styles.noPermissionsText}>
               You need to accept location permissions in order to use this

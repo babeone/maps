@@ -3,10 +3,12 @@ import {View, Text, FlatList, StyleSheet, TouchableOpacity} from 'react-native';
 import {Icon} from 'react-native-elements';
 import PropTypes from 'prop-types';
 
+import Page from '../examples/common/Page';
 import MapHeader from '../examples/common/MapHeader';
 import sheet from '../styles/sheet';
 import colors from '../styles/colors';
 import ShowMap from '../examples/ShowMap';
+import MarkerView from '../examples/MarkerView';
 import SetPitch from '../examples/SetPitch';
 import SetHeading from '../examples/SetHeading';
 import ShowClick from '../examples/ShowClick';
@@ -27,6 +29,7 @@ import QueryWithRect from '../examples/QueryWithRect';
 import ShapeSourceIcon from '../examples/ShapeSourceIcon';
 import CustomVectorSource from '../examples/CustomVectorSource';
 import ShowPointAnnotation from '../examples/ShowPointAnnotation';
+import AnimatedLine from '../examples/AnimatedLine';
 import CreateOfflineRegion from '../examples/CreateOfflineRegion';
 import DriveTheLine from '../examples/DriveTheLine';
 import ImageOverlay from '../examples/ImageOverlay';
@@ -43,6 +46,9 @@ import RestrictMapBounds from '../examples/RestrictMapBounds';
 import ShowAndHideLayer from '../examples/ShowAndHideLayer';
 import ChangeLayerColor from '../examples/ChangeLayerColor';
 import SourceLayerVisibility from '../examples/SourceLayerVisibility';
+import SetDisplacement from '../examples/SetDisplacement';
+import CompassView from '../examples/CompassView';
+import BugReportTemplate from '../examples/BugReportExample';
 
 const styles = StyleSheet.create({
   header: {
@@ -79,6 +85,12 @@ class ExampleItem {
   }
 }
 
+const BugReportPage = ({...props}) => (
+  <Page {...props}>
+    <BugReportTemplate />
+  </Page>
+);
+
 const Examples = [
   new ExampleItem('Show Map', ShowMap),
   new ExampleItem('Set Pitch', SetPitch),
@@ -105,6 +117,8 @@ const Examples = [
   new ExampleItem('Shape Source From Icon', ShapeSourceIcon),
   new ExampleItem('Custom Vector Source', CustomVectorSource),
   new ExampleItem('Show Point Annotation', ShowPointAnnotation),
+  new ExampleItem('Animated Line', AnimatedLine),
+  new ExampleItem('Marker View', MarkerView),
   new ExampleItem('Create Offline Region', CreateOfflineRegion),
   new ExampleItem('Animation Along a Line', DriveTheLine),
   new ExampleItem('Image Overlay', ImageOverlay),
@@ -120,6 +134,9 @@ const Examples = [
   new ExampleItem('Show and hide a layer', ShowAndHideLayer),
   new ExampleItem('Change Layer Color', ChangeLayerColor),
   new ExampleItem('Source Layer Visiblity', SourceLayerVisibility),
+  new ExampleItem('Set Displacement', SetDisplacement),
+  new ExampleItem('Compass View', CompassView),
+  new ExampleItem('Bug Report Template', BugReportPage),
 ];
 
 class Home extends React.Component {

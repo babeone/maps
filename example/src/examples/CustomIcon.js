@@ -1,6 +1,7 @@
 import React from 'react';
 import {Text} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
+import {featureCollection, feature} from '@turf/helpers';
 
 import sheet from '../styles/sheet';
 import exampleIcon from '../assets/example.png';
@@ -25,7 +26,7 @@ class CustomIcon extends React.Component {
     super(props);
 
     this.state = {
-      featureCollection: MapboxGL.geoUtils.makeFeatureCollection(),
+      featureCollection: featureCollection([]),
     };
 
     this.onPress = this.onPress.bind(this);
@@ -33,20 +34,24 @@ class CustomIcon extends React.Component {
   }
 
   async onPress(e) {
-    const feature = MapboxGL.geoUtils.makeFeature(e.geometry);
-    feature.id = `${Date.now()}`;
+    const aFeature = feature(e.geometry);
+    aFeature.id = `${Date.now()}`;
 
     this.setState({
-      featureCollection: MapboxGL.geoUtils.addToFeatureCollection(
-        this.state.featureCollection,
-        feature,
-      ),
+      featureCollection: featureCollection([
+        ...this.state.featureCollection.features,
+        aFeature,
+      ]),
     });
   }
 
-  onSourceLayerPress(e) {
-    const feature = e.nativeEvent.payload;
-    console.log('You pressed a layer here is your feature', feature); // eslint-disable-line
+  onSourceLayerPress({features, coordinates, point}) {
+    console.log(
+      'You pressed a layer here are your features:',
+      features,
+      coordinates,
+      point,
+    );
   }
 
   render() {
@@ -55,8 +60,7 @@ class CustomIcon extends React.Component {
         <MapboxGL.MapView
           ref={c => (this._map = c)}
           onPress={this.onPress}
-          style={sheet.matchParent}
-        >
+          style={sheet.matchParent}>
           <MapboxGL.Camera
             zoomLevel={9}
             centerCoordinate={[-73.970895, 40.723279]}
@@ -66,8 +70,7 @@ class CustomIcon extends React.Component {
             id="symbolLocationSource"
             hitbox={{width: 20, height: 20}}
             onPress={this.onSourceLayerPress}
-            shape={this.state.featureCollection}
-          >
+            shape={this.state.featureCollection}>
             <MapboxGL.SymbolLayer
               id="symbolLocationSymbols"
               minZoomLevel={1}

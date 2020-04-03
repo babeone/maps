@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {NativeModules, requireNativeComponent} from 'react-native';
-import resolveAssetSource from 'react-native/Libraries/Image/resolveAssetSource';
 
 import {
   toJSONString,
@@ -9,6 +8,7 @@ import {
   viewPropTypes,
   isFunction,
 } from '../utils';
+import {copyPropertiesAsDeprecated} from '../utils/deprecation';
 
 import AbstractSource from './AbstractSource';
 
@@ -22,8 +22,6 @@ export const NATIVE_MODULE_NAME = 'RCTMGLShapeSource';
  */
 class ShapeSource extends AbstractSource {
   static NATIVE_ASSETS_KEY = 'assets';
-
-  static imageSourcePrefix = '__shape_source_images__';
 
   static propTypes = {
     ...viewPropTypes,
@@ -85,19 +83,13 @@ class ShapeSource extends AbstractSource {
     tolerance: PropTypes.number,
 
     /**
-     * Specifies the external images in key-value pairs required for the shape source.
-     * If you have an asset under Image.xcassets on iOS and the drawables directory on android
-     * you can specify an array of string names with assets as the key `{ assets: ['pin'] }`.
-     *
-     * Deprecated, please use Images#images.
-     */
-    images: PropTypes.object,
-
-    /**
      * Source press listener, gets called when a user presses one of the children layers only
      * if that layer has a higher z-index than another source layers
      *
-     * @param {NativeSyntheticEvent<GeoJSONFeatureEvent>} event - event with geojson feature as payload
+     * @param {Object} event
+     * @param {Object[]} event.features - the geojson features that have hit by the press (might be multiple)
+     * @param {Object} event.coordinates - the coordinates of the click
+     * @param {Object} event.point - the point of the click
      * @return void
      */
     onPress: PropTypes.func,
@@ -133,39 +125,33 @@ class ShapeSource extends AbstractSource {
     return toJSONString(this.props.shape);
   }
 
-  _getImages() {
-    if (!this.props.images) {
-      return;
-    }
-    if (!this.props.id.startsWith(ShapeSource.imageSourcePrefix)) {
-      console.warn(
-        'ShapeSource#images is deprecated, please use Images#images',
-      );
-    }
-
-    const images = {};
-    let nativeImages = [];
-
-    const imageNames = Object.keys(this.props.images);
-    for (const imageName of imageNames) {
-      if (
-        imageName === ShapeSource.NATIVE_ASSETS_KEY &&
-        Array.isArray(this.props.images[ShapeSource.NATIVE_ASSETS_KEY])
-      ) {
-        nativeImages = this.props.images[ShapeSource.NATIVE_ASSETS_KEY];
-        continue;
-      }
-
-      const res = resolveAssetSource(this.props.images[imageName]);
-      if (res && res.uri) {
-        images[imageName] = res;
-      }
-    }
-
-    return {
-      images,
-      nativeImages,
+  onPress(event) {
+    const {
+      nativeEvent: {
+        payload: {features, coordinates, point},
+      },
+    } = event;
+    let newEvent = {
+      features,
+      coordinates,
+      point,
     };
+    newEvent = copyPropertiesAsDeprecated(
+      event,
+      newEvent,
+      key => {
+        console.warn(
+          `event.${key} is deprecated on ShapeSource#onPress, please use event.features`,
+        );
+      },
+      {
+        nativeEvent: origNativeEvent => ({
+          ...origNativeEvent,
+          payload: features[0],
+        }),
+      },
+    );
+    this.props.onPress(newEvent);
   }
 
   render() {
@@ -175,14 +161,13 @@ class ShapeSource extends AbstractSource {
       shape: this._getShape(),
       hitbox: this.props.hitbox,
       hasPressListener: isFunction(this.props.onPress),
-      onMapboxShapeSourcePress: this.props.onPress,
+      onMapboxShapeSourcePress: this.onPress.bind(this),
       cluster: this.props.cluster ? 1 : 0,
       clusterRadius: this.props.clusterRadius,
       clusterMaxZoomLevel: this.props.clusterMaxZoomLevel,
       maxZoomLevel: this.props.maxZoomLevel,
       buffer: this.props.buffer,
       tolerance: this.props.tolerance,
-      ...this._getImages(),
       onPress: undefined,
     };
 
@@ -201,7 +186,6 @@ const RCTMGLShapeSource = requireNativeComponent(
   ShapeSource,
   {
     nativeOnly: {
-      nativeImages: true,
       hasPressListener: true,
       onMapboxShapeSourcePress: true,
     },
