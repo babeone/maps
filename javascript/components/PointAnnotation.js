@@ -1,14 +1,11 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import {
-  requireNativeComponent,
-  StyleSheet,
-  findNodeHandle,
-  UIManager,
-} from 'react-native';
+import {requireNativeComponent, StyleSheet, Platform} from 'react-native';
 
 import {toJSONString, isFunction, viewPropTypes} from '../utils';
 import {makePoint} from '../utils/geoUtils';
+
+import NativeBridgeComponent from './NativeBridgeComponent';
 
 export const NATIVE_MODULE_NAME = 'RCTMGLPointAnnotation';
 
@@ -21,10 +18,16 @@ const styles = StyleSheet.create({
 });
 
 /**
- * PointAnnotation represents a one-dimensional shape located at a single geographical coordinate. Consider using ShapeSource and SymbolLayer instead, if you have many points and you have static images, they'll offer much better performance.
- * If you need interctive views please use MarkerView, as with PointAnnotation on android child views are rendered onto a bitmap for better performance.
+ * PointAnnotation represents a one-dimensional shape located at a single geographical coordinate.
+ *
+ * Consider using ShapeSource and SymbolLayer instead, if you have many points and you have static images,
+ * they'll offer much better performance
+ *
+ * .
+ * If you need interctive views please use MarkerView,
+ * as with PointAnnotation on Android child views are rendered onto a bitmap for better performance.
  */
-class PointAnnotation extends React.PureComponent {
+class PointAnnotation extends NativeBridgeComponent(React.PureComponent) {
   static propTypes = {
     ...viewPropTypes,
 
@@ -67,7 +70,13 @@ class PointAnnotation extends React.PureComponent {
      * Defaults to the center of the view.
      */
     anchor: PropTypes.shape({
+      /**
+       * See anchor
+       */
       x: PropTypes.number.isRequired,
+      /**
+       * See anchor
+       */
       y: PropTypes.number.isRequired,
     }),
 
@@ -90,6 +99,11 @@ class PointAnnotation extends React.PureComponent {
      * This callback is fired once this annotation has stopped being dragged.
      */
     onDragEnd: PropTypes.func,
+
+    /**
+     * This callback is fired while this annotation is being dragged.
+     */
+    onDrag: PropTypes.func,
   };
 
   static defaultProps = {
@@ -98,10 +112,11 @@ class PointAnnotation extends React.PureComponent {
   };
 
   constructor(props) {
-    super(props);
+    super(props, NATIVE_MODULE_NAME);
     this._onSelected = this._onSelected.bind(this);
     this._onDeselected = this._onDeselected.bind(this);
     this._onDragStart = this._onDragStart.bind(this);
+    this._onDrag = this._onDrag.bind(this);
     this._onDragEnd = this._onDragEnd.bind(this);
   }
 
@@ -123,6 +138,12 @@ class PointAnnotation extends React.PureComponent {
     }
   }
 
+  _onDrag(e) {
+    if (isFunction(this.props.onDrag)) {
+      this.props.onDrag(e.nativeEvent.payload);
+    }
+  }
+
   _onDragEnd(e) {
     if (isFunction(this.props.onDragEnd)) {
       this.props.onDragEnd(e.nativeEvent.payload);
@@ -131,7 +152,7 @@ class PointAnnotation extends React.PureComponent {
 
   _getCoordinate() {
     if (!this.props.coordinate) {
-      return;
+      return undefined;
     }
     return toJSONString(makePoint(this.props.coordinate));
   }
@@ -143,13 +164,19 @@ class PointAnnotation extends React.PureComponent {
    */
   refresh() {
     if (Platform.OS === 'android') {
-      UIManager.dispatchViewManagerCommand(findNodeHandle(this), 'refresh', []);
+      this._runNativeCommand('refresh', this._nativeRef, []);
     }
+  }
+
+  _setNativeRef(nativeRef) {
+    this._nativeRef = nativeRef;
+    super._runPendingNativeCommands(nativeRef);
   }
 
   render() {
     const props = {
       ...this.props,
+      ref: (nativeRef) => this._setNativeRef(nativeRef),
       id: this.props.id,
       title: this.props.title,
       snippet: this.props.snippet,
@@ -160,6 +187,7 @@ class PointAnnotation extends React.PureComponent {
       onMapboxPointAnnotationSelected: this._onSelected,
       onMapboxPointAnnotationDeselected: this._onDeselected,
       onMapboxPointAnnotationDragStart: this._onDragStart,
+      onMapboxPointAnnotationDrag: this._onDrag,
       onMapboxPointAnnotationDragEnd: this._onDragEnd,
       coordinate: this._getCoordinate(),
     };
@@ -179,6 +207,7 @@ const RCTMGLPointAnnotation = requireNativeComponent(
       onMapboxPointAnnotationSelected: true,
       onMapboxPointAnnotationDeselected: true,
       onMapboxPointAnnotationDragStart: true,
+      onMapboxPointAnnotationDrag: true,
       onMapboxPointAnnotationDragEnd: true,
     },
   },

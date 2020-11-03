@@ -133,7 +133,10 @@ const float CENTER_Y_OFFSET_BASE = -0.5f;
     } else {
         // custom view
         self.enabled = YES;
-        self.layer.zPosition = [self _getZPosition];
+        const CGFloat defaultZPosition = 0.0;
+        if (self.layer.zPosition == defaultZPosition) {
+            self.layer.zPosition = [self _getZPosition];
+        }
         [self addGestureRecognizer:customViewTap];
         return self;
     }
@@ -226,6 +229,10 @@ const float CENTER_Y_OFFSET_BASE = -0.5f;
         }
 
         case MGLAnnotationViewDragStateDragging:
+            if (self.onDrag != nil) {
+                RCTMGLMapTouchEvent *event = [RCTMGLMapTouchEvent makeAnnotationTapEventOnDrag:self];
+                self.onDrag([event toJSON]);
+            }
             break;
 
         case MGLAnnotationViewDragStateEnding:

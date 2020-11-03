@@ -12,6 +12,7 @@ import com.mapbox.mapboxsdk.style.expressions.Expression;
 import com.mapbox.mapboxsdk.style.layers.TransitionOptions;
 import com.mapbox.rctmgl.utils.ConvertUtils;
 import com.mapbox.rctmgl.utils.ExpressionParser;
+import com.mapbox.rctmgl.utils.ImageEntry;
 
 /**
  * Created by nickitaliano on 9/12/17.
@@ -26,7 +27,7 @@ public class RCTMGLStyleValue {
 
     private String imageURI = "";
     private boolean isAddImage;
-    private Double imageScale = 1.0;
+    private Double imageScale = ImageEntry.defaultScale;
 
     public static final int InterpolationModeExponential = 100;
     public static final int InterpolationModeInterval = 101;
@@ -38,7 +39,7 @@ public class RCTMGLStyleValue {
         mPayload = config.getMap("stylevalue");
 
         if ("image".equals(mType)) {
-            imageScale = 1.0;
+            imageScale = ImageEntry.defaultScale;
             if ("hashmap".equals(mPayload.getString("type"))) {
                 ReadableMap map = getMap();
                 imageURI = map.getMap("uri").getString("value");
@@ -171,6 +172,14 @@ public class RCTMGLStyleValue {
         return isAddImage;
     }
 
+    public Boolean isImageStringValue() {
+        return "string".equals(mPayload.getString("type"));
+    }
+
+    public String getImageStringValue() {
+        return mPayload.getString("value");
+    }
+
     public String getImageURI() {
         return imageURI;
     }
@@ -189,6 +198,15 @@ public class RCTMGLStyleValue {
         if (config.hasKey("enablePlacementTransitions")) {
             enablePlacementTransitions = config.getMap("enablePlacementTransitions").getBoolean("value");
         }
-        return new TransitionOptions(config.getMap("duration").getInt("value"), config.getMap("delay").getInt("value"), enablePlacementTransitions);
+        int duration = 300;
+        int delay = 0;
+        if (config.hasKey("duration") && ReadableType.Map.equals(config.getType("duration"))) {
+            duration = config.getMap("duration").getInt("value");
+        }
+        if (config.hasKey("delay") && ReadableType.Map.equals(config.getType("delay"))) {
+            duration = config.getMap("delay").getInt("value");
+        }
+
+        return new TransitionOptions(duration, delay, enablePlacementTransitions);
     }
 }

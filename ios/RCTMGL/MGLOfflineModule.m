@@ -146,12 +146,48 @@ RCT_EXPORT_METHOD(getPacks:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseR
         
         if (packs == nil) {
             // packs have not loaded yet
-            [packRequestQueue addObject:resolve];
+            [self->packRequestQueue addObject:resolve];
             return;
         }
 
         resolve([self _convertPacksToJson:packs]);
     });
+}
+
+RCT_EXPORT_METHOD(invalidateAmbientCache:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [[MGLOfflineStorage sharedOfflineStorage] invalidateAmbientCacheWithCompletionHandler:^(NSError *error) {
+        if (error != nil) {
+            reject(@"invalidateAmbientCache", error.description, error);
+            return;
+        }
+        resolve(nil);
+    }];
+}
+
+RCT_EXPORT_METHOD(clearAmbientCache:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [[MGLOfflineStorage sharedOfflineStorage] clearAmbientCacheWithCompletionHandler:^(NSError *error) {
+        if (error != nil) {
+            reject(@"clearAmbientCache", error.description, error);
+            return;
+        }
+        resolve(nil);
+    }];
+}
+
+RCT_EXPORT_METHOD(setMaximumAmbientCacheSize:(NSUInteger)cacheSize
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    [[MGLOfflineStorage sharedOfflineStorage] setMaximumAmbientCacheSize:cacheSize withCompletionHandler:^(NSError *error) {
+        if (error != nil) {
+            reject(@"setMaximumAmbientCacheSize", error.description, error);
+            return;
+        }
+        resolve(nil);
+    }];
+    
 }
 
 RCT_EXPORT_METHOD(resetDatabase:(RCTPromiseResolveBlock)resolve rejecter:(RCTPromiseRejectBlock)reject)
@@ -179,6 +215,25 @@ RCT_EXPORT_METHOD(getPackStatus:(NSString *)name
     }
     
     resolve([self _makeRegionStatusPayload:name pack:pack]);
+}
+
+RCT_EXPORT_METHOD(invalidatePack:(NSString *)name
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+{
+    MGLOfflinePack *pack = [self _getPackFromName:name];
+
+    if (pack == nil) {
+        resolve(nil);
+        return;
+    }
+    [[MGLOfflineStorage sharedOfflineStorage] invalidatePack:pack  withCompletionHandler:^(NSError *error) {
+        if (error != nil) {
+            reject(@"invalidatePack", error.description, error);
+            return;
+        }
+        resolve(nil);
+    }];
 }
 
 RCT_EXPORT_METHOD(deletePack:(NSString *)name

@@ -38,6 +38,9 @@ class LocationManager {
   }
 
   addListener(listener) {
+    if (!this._isListening) {
+      this.start();
+    }
     if (!this._listeners.includes(listener)) {
       this._listeners.push(listener);
 
@@ -48,11 +51,15 @@ class LocationManager {
   }
 
   removeListener(listener) {
-    this._listeners = this._listeners.filter(l => l !== listener);
+    this._listeners = this._listeners.filter((l) => l !== listener);
+    if (this._listeners.length === 0) {
+      this.stop();
+    }
   }
 
   removeAllListeners() {
     this._listeners = [];
+    this.stop();
   }
 
   start(displacement = 0) {
@@ -88,7 +95,7 @@ class LocationManager {
   onUpdate(location) {
     this._lastKnownLocation = location;
 
-    this._listeners.forEach(l => l(location));
+    this._listeners.forEach((l) => l(location));
   }
 }
 

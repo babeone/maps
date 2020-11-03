@@ -13,6 +13,10 @@ if (__DEV__) {
   }
 }
 
+const defaultConfig = {
+  useNativeDriver: false,
+};
+
 class AnimatedCoordinatesArray extends AnimatedWithChildren {
   constructor(...args) {
     super();
@@ -27,7 +31,7 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
    * @returns {object} - the state object
    */
   onInitialState(coordinatesArray) {
-    return {coords: coordinatesArray.map(coord => [coord[0], coord[1]])};
+    return {coords: coordinatesArray.map((coord) => [coord[0], coord[1]])};
   }
 
   /**
@@ -52,7 +56,6 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
     const {coords, targetCoords} = state;
     const newF = progress;
     const origF = 1.0 - newF;
-    
 
     // common
     const commonLen = Math.min(coords.length, targetCoords.length);
@@ -69,7 +72,7 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
         coords.length > 0 ? coords[coords.length - 1] : targetCoords[0];
       const adding = targetCoords
         .slice(commonLen, targetCoords.length)
-        .map(newCoord => [
+        .map((newCoord) => [
           addingOrig[0] * origF + newCoord[0] * newF,
           addingOrig[1] * origF + newCoord[1] * newF,
         ]);
@@ -84,7 +87,7 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
           : coords[0];
       const dissapearing = coords
         .slice(commonLen, coords.length)
-        .map(origCoord => [
+        .map((origCoord) => [
           origCoord[0] * origF + dissapearingNew[0] * newF,
           origCoord[1] * origF + dissapearingNew[1] * newF,
         ]);
@@ -102,7 +105,7 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
    * @returns {object} The state
    */
   onStart(state, toValue) {
-    const targetCoords = toValue.map(coord => [coord[0], coord[1]]);
+    const targetCoords = toValue.map((coord) => [coord[0], coord[1]]);
     return {
       ...state,
       targetCoords,
@@ -112,7 +115,7 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
   animate(progressValue, progressAnimation, config) {
     const {toValue} = config;
 
-    const onAnimationStart = animation => {
+    const onAnimationStart = (animation) => {
       if (this.animation) {
         // there was a started but not finsihed animation
         const actProgress = this.progressValue.__getValue();
@@ -142,7 +145,11 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
     const progressValue = new Animated.Value(0.0);
     return this.animate(
       progressValue,
-      Animated.timing(progressValue, {...config, toValue: 1.0}),
+      Animated.timing(progressValue, {
+        ...defaultConfig,
+        ...config,
+        toValue: 1.0,
+      }),
       config,
     );
   }
@@ -151,7 +158,11 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
     const progressValue = new Animated.Value(0.0);
     return this.animate(
       progressValue,
-      Animated.spring(progressValue, {...config, toValue: 1.0}),
+      Animated.spring(progressValue, {
+        ...defaultConfig,
+        ...config,
+        toValue: 1.0,
+      }),
       config,
     );
   }
@@ -160,7 +171,11 @@ class AnimatedCoordinatesArray extends AnimatedWithChildren {
     const progressValue = new Animated.Value(0.0);
     return this.animate(
       progressValue,
-      Animated.decay(this.progressValue, {...config, toValue: 1.0}),
+      Animated.decay(this.progressValue, {
+        ...defaultConfig,
+        ...config,
+        toValue: 1.0,
+      }),
       config,
     );
   }

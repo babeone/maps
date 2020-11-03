@@ -14,6 +14,7 @@
 - (MGLStyleLayer*)makeLayer:(MGLStyle*)style
 {
     MGLSource *source =  [style sourceWithIdentifier:self.sourceID];
+    if (source == nil) { return nil; }
     MGLRasterStyleLayer *layer = [[MGLRasterStyleLayer alloc] initWithIdentifier:self.id source:source];
     return layer;
 }
@@ -22,7 +23,8 @@
 {
     RCTMGLStyle *style = [[RCTMGLStyle alloc] initWithMGLStyle:self.style];
     style.bridge = self.bridge;
-    [style rasterLayer:(MGLRasterStyleLayer*)self.styleLayer withReactStyle:self.reactStyle];
+    [style rasterLayer:(MGLRasterStyleLayer*)self.styleLayer withReactStyle:self.reactStyle isValid:^{ return [self isAddedToMap];
+    }];
 }
 
 @end

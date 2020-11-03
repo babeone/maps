@@ -6,7 +6,7 @@ import {
   NativeModules,
   requireNativeComponent,
 } from 'react-native';
-import _ from 'underscore';
+import {debounce} from 'debounce';
 
 import {makePoint, makeLatLngBounds} from '../utils/geoUtils';
 import {
@@ -17,10 +17,16 @@ import {
   viewPropTypes,
 } from '../utils';
 import {getFilter} from '../utils/filterUtils';
+import Logger from '../utils/Logger';
 
 import NativeBridgeComponent from './NativeBridgeComponent';
 
 const MapboxGL = NativeModules.MGLModule;
+if (MapboxGL == null) {
+  console.error(
+    'Native part of Mapbox React Native libraries were not registered properly, double check our native installation guides.',
+  );
+}
 
 export const NATIVE_MODULE_NAME = 'RCTMGLMapView';
 
@@ -114,6 +120,12 @@ class MapView extends NativeBridgeComponent(React.Component) {
       PropTypes.shape({bottom: PropTypes.number, left: PropTypes.number}),
       PropTypes.shape({bottom: PropTypes.number, right: PropTypes.number}),
     ]),
+
+    /**
+     * MapView's tintColor - ios only
+     * @platform ios
+     */
+    tintColor: PropTypes.oneOfType([PropTypes.string, PropTypes.array]),
 
     /**
      * Enable/Disable the logo on the map.
@@ -253,6 +265,9 @@ class MapView extends NativeBridgeComponent(React.Component) {
   constructor(props) {
     super(props, NATIVE_MODULE_NAME);
 
+    this.logger = Logger.sharedInstance();
+    this.logger.start();
+
     this.state = {
       isReady: null,
       region: null,
@@ -267,13 +282,13 @@ class MapView extends NativeBridgeComponent(React.Component) {
     this._onLayout = this._onLayout.bind(this);
 
     // debounced map change methods
-    this._onDebouncedRegionWillChange = _.debounce(
+    this._onDebouncedRegionWillChange = debounce(
       this._onRegionWillChange.bind(this),
       props.regionWillChangeDebounceTime,
       true,
     );
 
-    this._onDebouncedRegionDidChange = _.debounce(
+    this._onDebouncedRegionDidChange = debounce(
       this._onRegionDidChange.bind(this),
       props.regionDidChangeDebounceTime,
     );
@@ -284,8 +299,9 @@ class MapView extends NativeBridgeComponent(React.Component) {
   }
 
   componentWillUnmount() {
-    this._onDebouncedRegionWillChange.cancel();
-    this._onDebouncedRegionDidChange.cancel();
+    this._onDebouncedRegionWillChange.clear();
+    this._onDebouncedRegionDidChange.clear();
+    this.logger.stop();
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -296,34 +312,48 @@ class MapView extends NativeBridgeComponent(React.Component) {
     if (isAndroid()) {
       const events = [];
 
-      if (props.onRegionWillChange)
+      if (props.onRegionWillChange) {
         events.push(MapboxGL.EventTypes.RegionWillChange);
-      if (props.onRegionIsChanging)
+      }
+      if (props.onRegionIsChanging) {
         events.push(MapboxGL.EventTypes.RegionIsChanging);
-      if (props.onRegionDidChange)
+      }
+      if (props.onRegionDidChange) {
         events.push(MapboxGL.EventTypes.RegionDidChange);
-      if (props.onUserLocationUpdate)
+      }
+      if (props.onUserLocationUpdate) {
         events.push(MapboxGL.EventTypes.UserLocationUpdated);
-      if (props.onWillStartLoadingMap)
+      }
+      if (props.onWillStartLoadingMap) {
         events.push(MapboxGL.EventTypes.WillStartLoadingMap);
-      if (props.onDidFinishLoadingMap)
+      }
+      if (props.onDidFinishLoadingMap) {
         events.push(MapboxGL.EventTypes.DidFinishLoadingMap);
-      if (props.onDidFailLoadingMap)
+      }
+      if (props.onDidFailLoadingMap) {
         events.push(MapboxGL.EventTypes.DidFailLoadingMap);
-      if (props.onWillStartRenderingFrame)
+      }
+      if (props.onWillStartRenderingFrame) {
         events.push(MapboxGL.EventTypes.WillStartRenderingFrame);
-      if (props.onDidFinishRenderingFrame)
+      }
+      if (props.onDidFinishRenderingFrame) {
         events.push(MapboxGL.EventTypes.DidFinishRenderingFrame);
-      if (props.onDidFinishRenderingFrameFully)
+      }
+      if (props.onDidFinishRenderingFrameFully) {
         events.push(MapboxGL.EventTypes.DidFinishRenderingFrameFully);
-      if (props.onWillStartRenderingMap)
+      }
+      if (props.onWillStartRenderingMap) {
         events.push(MapboxGL.EventTypes.WillStartRenderingMap);
-      if (props.onDidFinishRenderingMap)
+      }
+      if (props.onDidFinishRenderingMap) {
         events.push(MapboxGL.EventTypes.DidFinishRenderingMap);
-      if (props.onDidFinishRenderingMapFully)
+      }
+      if (props.onDidFinishRenderingMapFully) {
         events.push(MapboxGL.EventTypes.DidFinishRenderingMapFully);
-      if (props.onDidFinishLoadingStyle)
+      }
+      if (props.onDidFinishLoadingStyle) {
         events.push(MapboxGL.EventTypes.DidFinishLoadingStyle);
+      }
 
       this._runNativeCommand(
         'setHandledMapChangedEvents',
@@ -711,7 +741,7 @@ class MapView extends NativeBridgeComponent(React.Component) {
     };
 
     const callbacks = {
-      ref: nativeRef => this._setNativeRef(nativeRef),
+      ref: (nativeRef) => this._setNativeRef(nativeRef),
       onPress: this._onPress,
       onLongPress: this._onLongPress,
       onMapChange: this._onChange,
@@ -734,7 +764,11 @@ class MapView extends NativeBridgeComponent(React.Component) {
     }
 
     return (
-      <View onLayout={this._onLayout} style={this.props.style}>
+      <View
+        onLayout={this._onLayout}
+        style={this.props.style}
+        testID={mapView ? null : this.props.testID}
+      >
         {mapView}
       </View>
     );

@@ -25,9 +25,6 @@
 
 @implementation RCTMGLMapViewManager
 
-// prevents SDK from crashing and cluttering logs
-// since we don't have access to the frame right away
-static CGRect const RCT_MAPBOX_MIN_MAP_FRAME = { { 0.0f, 0.0f }, { 64.0f, 64.0f } };
 
 RCT_EXPORT_MODULE(RCTMGLMapView)
 
@@ -36,9 +33,16 @@ RCT_EXPORT_MODULE(RCTMGLMapView)
     return YES;
 }
 
+// prevents SDK from crashing and cluttering logs
+// since we don't have access to the frame right away
+- (CGRect)defaultFrame
+{
+    return [[UIScreen mainScreen] bounds];
+}
+
 - (UIView *)view
 {
-    RCTMGLMapView *mapView = [[RCTMGLMapView alloc] initWithFrame:RCT_MAPBOX_MIN_MAP_FRAME];
+    RCTMGLMapView *mapView = [[RCTMGLMapView alloc] initWithFrame:[self defaultFrame]];
     mapView.delegate = self;
 
 
@@ -82,10 +86,11 @@ RCT_REMAP_VIEW_PROPERTY(zoomEnabled, reactZoomEnabled, BOOL)
 RCT_REMAP_VIEW_PROPERTY(compassViewPosition, reactCompassViewPosition, NSInteger *)
 RCT_REMAP_VIEW_PROPERTY(compassViewMargins, reactCompassViewMargins, CGPoint)
 
-
 RCT_REMAP_VIEW_PROPERTY(contentInset, reactContentInset, NSArray)
 RCT_REMAP_VIEW_PROPERTY(styleURL, reactStyleURL, NSString)
 RCT_REMAP_VIEW_PROPERTY(preferredFramesPerSecond, reactPreferredFramesPerSecond, NSInteger)
+
+RCT_EXPORT_VIEW_PROPERTY(tintColor, UIColor)
 
 RCT_EXPORT_VIEW_PROPERTY(onPress, RCTBubblingEventBlock)
 RCT_EXPORT_VIEW_PROPERTY(onLongPress, RCTBubblingEventBlock)
@@ -405,7 +410,11 @@ RCT_EXPORT_METHOD(setSourceVisibility:(nonnull NSNumber *)reactTag
 - (MGLAnnotationView *)mapView:(MGLMapView *)mapView viewForAnnotation:(id<MGLAnnotation>)annotation
 {
     if ([annotation isKindOfClass:[MGLUserLocation class]] && mapView.userLocation != nil) {
-        return [[RCTMGLUserLocation sharedInstance] builtinUserAnnotation];
+        RCTMGLMapView* reactMapView = ((RCTMGLMapView *) mapView);
+        if (reactMapView.useNativeUserLocationAnnotationView) {
+            return nil;
+        }
+        return [[RCTMGLUserLocation sharedInstance] hiddenUserAnnotation];
     }
     else if ([annotation isKindOfClass:[RCTMGLPointAnnotation class]]) {
         RCTMGLPointAnnotation *rctAnnotation = (RCTMGLPointAnnotation *)annotation;
@@ -536,7 +545,9 @@ RCT_EXPORT_METHOD(setSourceVisibility:(nonnull NSNumber *)reactTag
 - (void)mapView:(MGLMapView *)mapView didFinishLoadingStyle:(MGLStyle *)style
 {
     RCTMGLMapView *reactMapView = (RCTMGLMapView*)mapView;
-    //style.localizesLabels = reactMapView.reactLocalizeLabels;
+    if(reactMapView.reactLocalizeLabels == true) {
+        [style localizeLabelsIntoLocale:nil];
+    }
     
     for (int i = 0; i < reactMapView.sources.count; i++) {
         RCTMGLSource *source = reactMapView.sources[i];

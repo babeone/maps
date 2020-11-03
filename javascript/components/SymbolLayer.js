@@ -21,7 +21,7 @@ class SymbolLayer extends AbstractLayer {
     /**
      * A string that uniquely identifies the source in the style to which it is added.
      */
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
 
     /**
      * The source from which to obtain the data to style. If the source has not yet been added to the current style, the behavior is undefined.
@@ -83,7 +83,7 @@ class SymbolLayer extends AbstractLayer {
       return isSnapshot;
     }
 
-    React.Children.forEach(this.props.children, child => {
+    React.Children.forEach(this.props.children, (child) => {
       if (child.type === View) {
         isSnapshot = true;
       }

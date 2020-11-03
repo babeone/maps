@@ -13,7 +13,7 @@
 
 @interface RCTMGLSource : UIView
 
-extern NSString *const DEFAULT_SOURCE_ID;
+extern NSString * _Nonnull const DEFAULT_SOURCE_ID;
 
 @property (nonatomic, strong) NSMutableArray<id<RCTComponent>> *reactSubviews;
 @property (nonatomic, strong) NSMutableArray<RCTMGLLayer*> *layers;
@@ -27,7 +27,7 @@ extern NSString *const DEFAULT_SOURCE_ID;
 
 - (void)addToMap;
 - (void)removeFromMap;
-- (MGLSource*)makeSource;
+- (nullable MGLSource*)makeSource;
 - (NSArray<NSString *> *)getLayerIDs;
 
 + (BOOL)isDefaultSource:(NSString*)sourceID;

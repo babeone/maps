@@ -14,14 +14,23 @@
 - (void)setUrl:(NSString *)url
 {
     _url = url;
-    
+
     if (self.source != nil) {
         MGLImageSource *source = (MGLImageSource *)self.source;
         source.URL = [NSURL URLWithString:_url];
     }
 }
 
-- (MGLSource *)makeSource
+- (void)setCoordinates:(NSArray<NSArray<NSNumber *> *> *)coordinates
+{
+    _coordinates = coordinates;
+    if (self.source != nil) {
+        MGLImageSource *source = (MGLImageSource *)self.source;
+        source.coordinates = [self _makeCoordQuad];
+    }
+}
+
+- (nullable MGLSource *)makeSource
 {
     NSURL *myURL;
 

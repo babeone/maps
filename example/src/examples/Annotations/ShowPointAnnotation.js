@@ -1,35 +1,26 @@
-/* eslint-disable react/prop-types */
-/* eslint-disable fp/no-mutating-methods */
 import React from 'react';
 import {Animated, View, Text, StyleSheet, Image} from 'react-native';
 import MapboxGL from '@react-native-mapbox-gl/maps';
 
-import sheet from '../styles/sheet';
+import sheet from '../../styles/sheet';
 
-import BaseExamplePropTypes from './common/BaseExamplePropTypes';
-import Page from './common/Page';
-import Bubble from './common/Bubble';
+import BaseExamplePropTypes from '../common/BaseExamplePropTypes';
+import Page from '../common/Page';
+import Bubble from '../common/Bubble';
 
 const ANNOTATION_SIZE = 45;
 
 const styles = StyleSheet.create({
   annotationContainer: {
-    width: ANNOTATION_SIZE,
-    height: ANNOTATION_SIZE,
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: 'white',
+    borderColor: 'rgba(0, 0, 0, 0.45)',
     borderRadius: ANNOTATION_SIZE / 2,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: 'rgba(0, 0, 0, 0.45)',
+    height: ANNOTATION_SIZE,
+    justifyContent: 'center',
     overflow: 'hidden',
-  },
-  annotationFill: {
-    width: ANNOTATION_SIZE - 3,
-    height: ANNOTATION_SIZE - 3,
-    borderRadius: (ANNOTATION_SIZE - 3) / 2,
-    backgroundColor: 'orange',
-    transform: [{scale: 0.6}],
+    width: ANNOTATION_SIZE,
   },
 });
 
@@ -43,7 +34,17 @@ class AnnotationWithRemoteImage extends React.Component {
         id={id}
         coordinate={coordinate}
         title={title}
-        ref={ref => (this.annotationRef = ref)}>
+        draggable
+        onDrag={(e) =>
+          console.log('onDrag:', e.properties.id, e.geometry.coordinates)
+        }
+        onDragStart={(e) =>
+          console.log('onDragStart:', e.properties.id, e.geometry.coordinates)
+        }
+        onDragEnd={(e) =>
+          console.log('onDragEnd:', e.properties.id, e.geometry.coordinates)
+        }
+        ref={(ref) => (this.annotationRef = ref)}>
         <View style={styles.annotationContainer}>
           <Image
             source={{uri: 'https://reactnative.dev/img/tiny_logo.png'}}
@@ -128,15 +129,15 @@ class ShowPointAnnotation extends React.Component {
         animationStyle.transform = [{scale: this._scaleOut}];
       }
 
-      if ((i % 2) === 1) {
+      if (i % 2 === 1) {
         items.push(
           <AnnotationWithRemoteImage
             key={id}
             id={id}
             coordinate={coordinate}
-            title={title} />
+            title={title}
+          />,
         );
-
       } else {
         items.push(
           <MapboxGL.PointAnnotation
@@ -158,7 +159,7 @@ class ShowPointAnnotation extends React.Component {
     return (
       <Page {...this.props}>
         <MapboxGL.MapView
-          ref={c => (this._map = c)}
+          ref={(c) => (this._map = c)}
           onPress={this.onPress}
           onDidFinishLoadingMap={this.onDidFinishLoadingMap}
           style={sheet.matchParent}>

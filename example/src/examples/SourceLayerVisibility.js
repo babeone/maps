@@ -11,6 +11,10 @@ const defaultCamera = {
   zoomLevel: 13,
 };
 
+const styles = {
+  mapView: {flex: 1},
+};
+
 class SourceLayerVisibility extends React.Component {
   static propTypes = {
     ...BaseExamplePropTypes,
@@ -35,9 +39,9 @@ class SourceLayerVisibility extends React.Component {
     return (
       <Page {...this.props}>
         <MapboxGL.MapView
-          ref={c => (this._map = c)}
+          ref={(c) => (this._map = c)}
           onPress={this.onPress}
-          style={{flex: 1}}>
+          style={styles.mapView}>
           <MapboxGL.Camera defaultSettings={defaultCamera} />
         </MapboxGL.MapView>
         <Bubble onPress={this.onPress}>

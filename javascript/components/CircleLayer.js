@@ -21,7 +21,7 @@ class CircleLayer extends AbstractLayer {
     /**
      * A string that uniquely identifies the source in the style to which it is added.
      */
-    id: PropTypes.string,
+    id: PropTypes.string.isRequired,
 
     /**
      * The source from which to obtain the data to style.
@@ -79,11 +79,13 @@ class CircleLayer extends AbstractLayer {
   };
 
   render() {
-    const props = {
-      ...this.baseProps,
-      sourceLayerID: this.props.sourceLayerID,
-    };
-    return <RCTMGLCircleLayer ref="nativeLayer" {...props} />;
+    return (
+      <RCTMGLCircleLayer
+        testID="rctmglCircleLayer"
+        ref="nativeLayer"
+        {...this.baseProps}
+      />
+    );
   }
 }
 

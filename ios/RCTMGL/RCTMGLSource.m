@@ -9,6 +9,7 @@
 #import "RCTMGLSource.h"
 #import "UIView+React.h"
 #import "RCTMGLMapView.h"
+#import <React/RCTLog.h>
 
 @implementation RCTMGLSource
 
@@ -61,7 +62,7 @@ NSString *const DEFAULT_SOURCE_ID = @"composite";
 }
 #pragma clang diagnostic pop
 
-- (void)setMap:(MGLMapView *)map
+- (void)setMap:(RCTMGLMapView *)map
 {
     if (map == nil) {
         [self removeFromMap];
@@ -83,7 +84,11 @@ NSString *const DEFAULT_SOURCE_ID = @"composite";
         _source = existingSource;
     } else {
         _source = [self makeSource];
-        [_map.style addSource:_source];
+        if (_source != nil) {
+            [_map.style addSource:_source];
+        } else {
+            RCTLogError(@"Could not create source with id:%@. Make sure url/shape is provided", _id);
+        }
     }
     
     if (_layers.count > 0) {
@@ -112,7 +117,7 @@ NSString *const DEFAULT_SOURCE_ID = @"composite";
     }
 }
 
-- (MGLSource*)makeSource
+- (nullable MGLSource*)makeSource
 {
     @throw [NSException exceptionWithName:NSInternalInconsistencyException
                         reason:[NSString stringWithFormat:@"You must override %@ in a subclass", NSStringFromSelector(_cmd)]

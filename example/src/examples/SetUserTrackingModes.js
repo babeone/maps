@@ -9,6 +9,12 @@ import BaseExamplePropTypes from './common/BaseExamplePropTypes';
 import TabBarPage from './common/TabBarPage';
 import Bubble from './common/Bubble';
 
+const styles = {
+  bubbleOne: {bottom: 80},
+  bubbleTwo: {bottom: 150},
+  bubbleThree: {bottom: 220},
+};
+
 class SetUserTrackingModes extends React.Component {
   static propTypes = {
     ...BaseExamplePropTypes,
@@ -17,9 +23,8 @@ class SetUserTrackingModes extends React.Component {
   constructor(props) {
     super(props);
 
-    // eslint-disable-next-line fp/no-mutating-methods
     this._trackingOptions = Object.keys(MapboxGL.UserTrackingModes)
-      .map(key => {
+      .map((key) => {
         return {
           label: key,
           data: MapboxGL.UserTrackingModes[key],
@@ -37,11 +42,13 @@ class SetUserTrackingModes extends React.Component {
       showUserLocation: true,
       userSelectedUserTrackingMode: this._trackingOptions[3].data,
       currentTrackingMode: this._trackingOptions[3].data,
+      showsUserHeadingIndicator: false,
     };
 
     this.onTrackingChange = this.onTrackingChange.bind(this);
     this.onUserTrackingModeChange = this.onUserTrackingModeChange.bind(this);
     this.onToggleUserLocation = this.onToggleUserLocation.bind(this);
+    this.onToggleHeadingIndicator = this.onToggleHeadingIndicator.bind(this);
   }
 
   onTrackingChange(index, userTrackingMode) {
@@ -58,6 +65,12 @@ class SetUserTrackingModes extends React.Component {
 
   onToggleUserLocation() {
     this.setState({showUserLocation: !this.state.showUserLocation});
+  }
+
+  onToggleHeadingIndicator() {
+    this.setState({
+      showsUserHeadingIndicator: !this.state.showsUserHeadingIndicator,
+    });
   }
 
   get userTrackingModeText() {
@@ -82,12 +95,15 @@ class SetUserTrackingModes extends React.Component {
         options={this._trackingOptions}
         onOptionPress={this.onTrackingChange}>
         <MapboxGL.MapView style={sheet.matchParent}>
-          <MapboxGL.UserLocation visible={this.state.showUserLocation} />
+          <MapboxGL.UserLocation
+            visible={this.state.showUserLocation}
+            showsUserHeadingIndicator={this.state.showsUserHeadingIndicator}
+          />
 
           <MapboxGL.Camera
             defaultSettings={{
               centerCoordinate: [-111.8678, 40.2866],
-              zoomLevel: 16,
+              zoomLevel: 0,
             }}
             followUserLocation={
               this.state.userSelectedUserTrackingMode !== 'none'
@@ -101,12 +117,24 @@ class SetUserTrackingModes extends React.Component {
           />
         </MapboxGL.MapView>
 
-        <Bubble style={{bottom: 100}}>
+        <Bubble style={styles.bubbleOne}>
           <Text>User Tracking Mode: {this.userTrackingModeText}</Text>
         </Bubble>
 
-        <Bubble onPress={this.onToggleUserLocation} style={{bottom: 180}}>
-          <Text>Toggle User Location</Text>
+        <Bubble onPress={this.onToggleUserLocation} style={styles.bubbleTwo}>
+          <Text>
+            Toggle User Location:{' '}
+            {this.state.showUserLocation ? 'true' : 'false'}
+          </Text>
+        </Bubble>
+
+        <Bubble
+          onPress={this.onToggleHeadingIndicator}
+          style={styles.bubbleThree}>
+          <Text>
+            Toggle user heading indicator:{' '}
+            {this.state.showsUserHeadingIndicator ? 'true' : 'false'}
+          </Text>
         </Bubble>
       </TabBarPage>
     );

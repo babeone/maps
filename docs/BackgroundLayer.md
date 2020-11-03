@@ -5,7 +5,7 @@
 ### props
 | Prop | Type | Default | Required | Description |
 | ---- | :--: | :-----: | :------: | :----------: |
-| id | `string` | `none` | `false` | A string that uniquely identifies the source in the style to which it is added. |
+| id | `string` | `none` | `true` | A string that uniquely identifies the source in the style to which it is added. |
 | sourceID | `string` | `MapboxGL.StyleSource.DefaultSourceID` | `false` | The source from which to obtain the data to style. If the source has not yet been added to the current style, the behavior is undefined. |
 | sourceLayerID | `string` | `none` | `false` | Identifier of the layer within the source identified by the sourceID property from which the receiver obtains the data to style. |
 | aboveLayerID | `string` | `none` | `false` | Inserts a layer above aboveLayerID. |
@@ -63,6 +63,26 @@ The color with which the background will be drawn.
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`backgroundColorTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s backgroundColor propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -79,6 +99,26 @@ Name of image in sprite to use for drawing an image background. For seamless pat
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`backgroundPatternTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s backgroundPattern propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -103,4 +143,24 @@ The opacity at which the background will be drawn.
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`backgroundOpacityTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s backgroundOpacity propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 

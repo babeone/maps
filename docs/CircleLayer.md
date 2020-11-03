@@ -5,7 +5,7 @@
 ### props
 | Prop | Type | Default | Required | Description |
 | ---- | :--: | :-----: | :------: | :----------: |
-| id | `string` | `none` | `false` | A string that uniquely identifies the source in the style to which it is added. |
+| id | `string` | `none` | `true` | A string that uniquely identifies the source in the style to which it is added. |
 | sourceID | `string` | `MapboxGL.StyleSource.DefaultSourceID` | `false` | The source from which to obtain the data to style.<br/>If the source has not yet been added to the current style, the behavior is undefined. |
 | sourceLayerID | `string` | `none` | `false` | Identifier of the layer within the source identified by the sourceID property<br/>from which the receiver obtains the data to style. |
 | aboveLayerID | `string` | `none` | `false` | Inserts a layer above aboveLayerID. |
@@ -74,6 +74,26 @@ Circle radius.
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleRadiusTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleRadius propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -92,6 +112,26 @@ The fill color of the circle.
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleColorTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleColor propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -110,6 +150,26 @@ Amount to blur the circle. 1 blurs the circle such that only the centerpoint is 
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleBlurTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleBlur propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -134,6 +194,26 @@ The opacity at which the circle will be drawn.
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleOpacityTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleOpacity propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -155,6 +235,26 @@ The geometry's offset. Values are [x, y] where negatives indicate left and up, r
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`circleTranslateTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleTranslate propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -248,6 +348,26 @@ The width of the circle's stroke. Strokes are placed outside of the `circleRadiu
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleStrokeWidthTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleStrokeWidth propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -266,6 +386,26 @@ The stroke color of the circle.
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleStrokeColorTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleStrokeColor propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -290,4 +430,24 @@ The opacity of the circle's stroke.
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`circleStrokeOpacityTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s circleStrokeOpacity propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 

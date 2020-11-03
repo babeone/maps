@@ -17,20 +17,6 @@ public class UserTrackingMode {
     public static final int FollowWithCourse = 2;
     public static final int FollowWithHeading = 3;
 
-    public static int getMapLayerMode(int mode, boolean isShowUserLocation) {
-        if (!isShowUserLocation) {
-            return -1;
-        } else if (mode == NONE) {
-            return -1;
-        } else if (mode == FollowWithCourse) {
-            return RenderMode.GPS;
-        } else if (mode == FollowWithHeading) {
-            return RenderMode.COMPASS;
-        } else {
-            return RenderMode.NORMAL;
-        }
-    }
-
     public static @CameraMode.Mode int getCameraMode(int mode) {
         switch(mode) {
             case NONE:
@@ -71,7 +57,7 @@ public class UserTrackingMode {
             case "compass":
                 return UserTrackingMode.FollowWithHeading;
             default:
-                return UserTrackingMode.NONE;
+                return UserTrackingMode.FOLLOW;
         }
     }
 }

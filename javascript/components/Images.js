@@ -9,6 +9,18 @@ import ShapeSource from './ShapeSource';
 
 export const NATIVE_MODULE_NAME = 'RCTMGLImages';
 
+function _isUrlOrPath(value) {
+  return (
+    (typeof value === 'string' || value instanceof String) &&
+    (value.startsWith('file://') ||
+      value.startsWith('http://') ||
+      value.startsWith('https://') ||
+      value.startsWith('data:') ||
+      value.startsWith('asset://') ||
+      value.startsWith('/'))
+  );
+}
+
 /**
  * Images defines the images used in Symbol etc layers
  */
@@ -20,10 +32,16 @@ class Images extends React.Component {
 
     /**
      * Specifies the external images in key-value pairs required for the shape source.
-     * If you have an asset under Image.xcassets on iOS and the drawables directory on android
-     * you can specify an array of string names with assets as the key `{ assets: ['pin'] }`.
+     * Keys are names - see iconImage expressions, values can be either urls-s objects
+     * with format {uri: 'http://...'}` or `require('image.png')` or `import 'image.png'`
      */
     images: PropTypes.object,
+
+    /**
+     * If you have an asset under Image.xcassets on iOS and the drawables directory on android
+     * you can specify an array of string names with assets as the key `['pin']`.
+     */
+    nativeAssetImages: PropTypes.arrayOf(PropTypes.string),
 
     /**
      * Gets called when a Layer is trying to render an image whose key is not present in
@@ -33,26 +51,38 @@ class Images extends React.Component {
   };
 
   _getImages() {
-    if (!this.props.images) {
+    if (!this.props.images && !this.props.nativeAssetImages) {
       return {};
     }
 
     const images = {};
     let nativeImages = [];
 
-    const imageNames = Object.keys(this.props.images);
-    for (const imageName of imageNames) {
-      if (
-        imageName === ShapeSource.NATIVE_ASSETS_KEY &&
-        Array.isArray(this.props.images[Images.NATIVE_ASSETS_KEY])
-      ) {
-        nativeImages = this.props.images[Images.NATIVE_ASSETS_KEY];
-      } else {
-        const res = resolveAssetSource(this.props.images[imageName]);
-        if (res && res.uri) {
-          images[imageName] = res;
+    if (this.props.images) {
+      const imageNames = Object.keys(this.props.images);
+      for (const imageName of imageNames) {
+        const value = this.props.images[imageName];
+        if (
+          imageName === ShapeSource.NATIVE_ASSETS_KEY &&
+          Array.isArray(value)
+        ) {
+          console.warn(
+            `Use of ${ShapeSource.NATIVE_ASSETS_KEY} in Images#images is deprecated please use Images#nativeAssetImages`,
+          );
+          nativeImages = value;
+        } else if (_isUrlOrPath(value)) {
+          images[imageName] = value;
+        } else {
+          const res = resolveAssetSource(value);
+          if (res && res.uri) {
+            images[imageName] = res;
+          }
         }
       }
+    }
+
+    if (this.props.nativeAssetImages) {
+      nativeImages = this.props.nativeAssetImages;
     }
 
     return {

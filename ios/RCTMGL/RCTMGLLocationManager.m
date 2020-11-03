@@ -17,6 +17,7 @@
     CLLocationManager *locationManager;
     CLLocation *lastKnownLocation;
     CLHeading *lastKnownHeading;
+    CLLocationDistance displacement;
     NSMutableArray<RCTMGLLocationBlock> *listeners;
     BOOL isListening;
 }
@@ -34,6 +35,7 @@
     if (self = [super init]) {
         [self _setupLocationManager];
         listeners = [[NSMutableArray alloc] init];
+        displacement = 0.0;
     }
     return self;
 }
@@ -46,23 +48,29 @@
 
 - (void)start:(CLLocationDistance)minDisplacement
 {
+
+    displacement = minDisplacement;
+
     if ([self isEnabled]) {
         return;
     }
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        [locationManager requestWhenInUseAuthorization];
-        [locationManager startUpdatingLocation];
-        [locationManager startUpdatingHeading];
-        [locationManager setDistanceFilter:(minDisplacement)];
-        isListening = YES;
+        [self->locationManager requestWhenInUseAuthorization];
+        [self->locationManager startUpdatingLocation];
+        [self->locationManager startUpdatingHeading];
+        [self->locationManager setDistanceFilter:(minDisplacement)];
+        self->isListening = YES;
     });
 }
 
 - (void)setMinDisplacement:(CLLocationDistance)minDisplacement
 {
-     dispatch_async(dispatch_get_main_queue(), ^{
-        [locationManager setDistanceFilter:(minDisplacement)];
+
+    displacement = minDisplacement;
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [self->locationManager setDistanceFilter:(minDisplacement)];
     });
 }
 
@@ -71,11 +79,11 @@
     if (![self isEnabled]) {
         return;
     }
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        [locationManager stopUpdatingLocation];
-        [locationManager stopUpdatingHeading];
-        isListening = NO;
+        [self->locationManager stopUpdatingLocation];
+        [self->locationManager stopUpdatingHeading];
+        self->isListening = NO;
     });
 }
 
@@ -104,7 +112,7 @@
 - (void)removeListener:(RCTMGLLocationBlock)listener
 {
     NSUInteger indexOf = [listeners indexOfObject:listener];
-    
+
     if (indexOf == NSNotFound) {
         return;
     }
@@ -115,6 +123,11 @@
 - (void)locationManager:(CLLocationManager *)manager didUpdateHeading:(CLHeading *)heading
 {
     lastKnownHeading = heading;
+
+    if (displacement > 0) {
+      return;
+    }
+
     [self _updateDelegate];
 }
 
@@ -127,10 +140,10 @@
 - (void)_setupLocationManager
 {
     __weak RCTMGLLocationManager *weakSelf = self;
-    
+
     dispatch_async(dispatch_get_main_queue(), ^{
-        locationManager = [[CLLocationManager alloc] init];
-        locationManager.delegate = weakSelf;
+        self->locationManager = [[CLLocationManager alloc] init];
+        self->locationManager.delegate = weakSelf;
     });
 }
 
@@ -139,16 +152,16 @@
     if (_delegate == nil) {
         return;
     }
-    
+
     RCTMGLLocation *userLocation = [self _convertToMapboxLocation:lastKnownLocation];
-    
+
     if (listeners.count > 0) {
         for (int i = 0; i < listeners.count; i++) {
             RCTMGLLocationBlock listener = listeners[i];
             listener(userLocation);
         }
     }
-    
+
     [_delegate locationManager:self didUpdateLocation:userLocation];
 }
 

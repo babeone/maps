@@ -1,9 +1,8 @@
 import React from 'react';
 import MapboxGL from '@react-native-mapbox-gl/maps';
-import {StyleSheet, Text, View, YellowBox} from 'react-native';
-import SafeAreaView from 'react-native-safe-area-view';
-import {createStackNavigator} from 'react-navigation';
-import CardStackStyleInterpolator from 'react-navigation-stack/dist/views/StackView/StackViewStyleInterpolator'; // eslint-disable-line import/no-extraneous-dependencies
+import {StyleSheet, Text, View, LogBox, SafeAreaView} from 'react-native';
+import {createStackNavigator, TransitionPresets} from 'react-navigation-stack';
+import {createAppContainer} from 'react-navigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
 import sheet from './styles/sheet';
@@ -13,8 +12,7 @@ import config from './utils/config';
 import Home from './scenes/Home';
 import Demo from './scenes/Demo';
 
-// :(
-YellowBox.ignoreWarnings([
+LogBox.ignoreLogs([
   'Warning: isMounted(...) is deprecated',
   'Module RCTImageLoader',
 ]);
@@ -34,20 +32,20 @@ const AppStackNavigator = createStackNavigator(
   {
     Home: {screen: Home},
     Demo: {screen: Demo},
+    Group: {screen: Home},
   },
   {
     initialRouteName: 'Home',
 
     navigationOptions: {
-      header: null,
+      ...TransitionPresets.SlideFromRightIOS,
     },
-
-    transitionConfig: () => ({
-      screenInterpolator: props =>
-        CardStackStyleInterpolator.forVertical(props),
-    }),
+    defaultNavigationOptions: {
+      headerShown: false,
+    },
   },
 );
+const AppContainer = createAppContainer(AppStackNavigator);
 
 class App extends React.Component {
   constructor(props) {
@@ -88,7 +86,7 @@ class App extends React.Component {
         </SafeAreaView>
       );
     }
-    return <AppStackNavigator />;
+    return <AppContainer />;
   }
 }
 

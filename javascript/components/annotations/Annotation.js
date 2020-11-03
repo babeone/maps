@@ -2,7 +2,8 @@ import React from 'react';
 import {Easing} from 'react-native';
 import PropTypes from 'prop-types';
 
-import MapboxGL from '../../index'; // eslint-disable-line import/no-cycle
+import SymbolLayer from '../SymbolLayer';
+import Animated from '../../utils/animated/Animated';
 import AnimatedMapPoint from '../../utils/animated/AnimatedPoint';
 
 class Annotation extends React.Component {
@@ -88,7 +89,7 @@ class Annotation extends React.Component {
 
   get symbolStyle() {
     if (!this.props.icon) {
-      return;
+      return undefined;
     }
     return Object.assign({}, this.props.style, {
       iconImage: this.props.icon,
@@ -101,20 +102,20 @@ class Annotation extends React.Component {
     }
 
     return (
-      <MapboxGL.Animated.ShapeSource
+      <Animated.ShapeSource
         id={this.props.id}
         ref="source"
         onPress={this.onPress}
         shape={this.state.shape}
       >
         {this.symbolStyle && (
-          <MapboxGL.SymbolLayer
+          <SymbolLayer
             id={`${this.props.id}-symbol`}
             style={this.symbolStyle}
           />
         )}
         {this.props.children}
-      </MapboxGL.Animated.ShapeSource>
+      </Animated.ShapeSource>
     );
   }
 }

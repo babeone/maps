@@ -61,9 +61,11 @@ public class RCTMGLCameraManager extends AbstractEventEmitter<RCTMGLCamera> {
         }
     }
 
+
     @ReactProp(name="userTrackingMode")
     public void setUserTrackingMode(RCTMGLCamera camera, int userTrackingMode) {
         camera.setUserTrackingMode(userTrackingMode);
+        throw new AssertionError("Unused code");
     }
 
     @ReactProp(name="followZoomLevel")
@@ -89,6 +91,11 @@ public class RCTMGLCameraManager extends AbstractEventEmitter<RCTMGLCamera> {
     @ReactProp(name="maxZoomLevel")
     public void setMaxZoomLevel(RCTMGLCamera camera, double value) {
         camera.setMaxZoomLevel(value);
+    }
+
+    @ReactProp(name="followPitch")
+    public void setFollowPitch(RCTMGLCamera camera, double value) {
+        camera.setFollowPitch(value);
     }
 
 }

@@ -21,6 +21,7 @@ const styles = {
     fillColor: 'green',
     fillOpacity: 0.84,
   },
+  bubbleText: {textAlign: 'center'},
 };
 
 class QueryWithRect extends React.Component {
@@ -82,7 +83,7 @@ class QueryWithRect extends React.Component {
     return (
       <Page {...this.props}>
         <MapboxGL.MapView
-          ref={c => (this._map = c)}
+          ref={(c) => (this._map = c)}
           onPress={this.onPress}
           style={sheet.matchParent}
           styleURL={MapboxGL.StyleURL.Light}>
@@ -108,7 +109,7 @@ class QueryWithRect extends React.Component {
         </MapboxGL.MapView>
 
         <Bubble>
-          <Text style={{textAlign: 'center'}}>{this.message}</Text>
+          <Text style={styles.bubbleText}>{this.message}</Text>
         </Bubble>
       </Page>
     );

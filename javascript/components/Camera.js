@@ -25,14 +25,17 @@ const SettingsPropTypes = {
    */
   pitch: PropTypes.number,
 
+  /**
+   * Represents a rectangle in geographical coordinates marking the visible area of the map.
+   */
   bounds: PropTypes.shape({
     /**
-     * northEastCoordinates - North east coordinate of bound
+     * North east coordinate of bound
      */
     ne: PropTypes.arrayOf(PropTypes.number).isRequired,
 
     /**
-     * southWestCoordinates - North east coordinate of bound
+     * South west coordinate of bound
      */
     sw: PropTypes.arrayOf(PropTypes.number).isRequired,
 
@@ -55,6 +58,11 @@ const SettingsPropTypes = {
      * Bottom camera padding for bounds
      */
     paddingBottom: PropTypes.number,
+
+    /**
+     * Callback that is triggered on user tracking mode changes
+     */
+    onUserTrackingModeChange: PropTypes.func,
   }),
 
   /**
@@ -67,17 +75,32 @@ class Camera extends React.Component {
   static propTypes = {
     ...viewPropTypes,
 
+    /**
+     * The duration a camera update takes (in ms)
+     */
     animationDuration: PropTypes.number,
 
+    /**
+     * The animationstyle when the camara updates. One of; `flyTo`, `easeTo`, `moveTo`
+     */
     animationMode: PropTypes.oneOf(['flyTo', 'easeTo', 'moveTo']),
 
-    // default - view settings
+    /**
+     * Default view settings applied on camera
+     */
     defaultSettings: PropTypes.shape(SettingsPropTypes),
 
     // normal - view settings
     ...SettingsPropTypes,
 
+    /**
+     * The minimun zoom level of the map
+     */
     minZoomLevel: PropTypes.number,
+
+    /**
+     * The maximun zoom level of the map
+     */
     maxZoomLevel: PropTypes.number,
 
     /**
@@ -105,15 +128,25 @@ class Camera extends React.Component {
      */
     followUserMode: PropTypes.oneOf(['normal', 'compass', 'course']),
 
+    /**
+     * The zoomLevel on map while followUserLocation is set to `true`
+     */
     followZoomLevel: PropTypes.number,
+
+    /**
+     * The pitch on map while followUserLocation is set to `true`
+     */
     followPitch: PropTypes.number,
+
+    /**
+     * The heading on map while followUserLocation is set to `true`
+     */
     followHeading: PropTypes.number,
 
-    // manual update
+    /**
+     * Manually update the camera - helpful for when props did not update, however you still want the camera to move
+     */
     triggerKey: PropTypes.any,
-
-    // position
-    alignment: PropTypes.arrayOf(PropTypes.number),
 
     // Triggered when the
     onUserTrackingModeChange: PropTypes.func,
@@ -122,7 +155,6 @@ class Camera extends React.Component {
   static defaultProps = {
     animationMode: 'easeTo',
     animationDuration: 2000,
-    isUserInteraction: false,
   };
 
   static Mode = {
@@ -476,51 +508,6 @@ class Camera extends React.Component {
     }
   }
 
-  _getAlignment(coordinate, zoomLevel) {
-    const region = geoUtils.getOrCalculateVisibleRegion(
-      coordinate,
-      zoomLevel,
-      this.props._mapWidth,
-      this.props._mapHeight,
-      this.props._region,
-    );
-
-    const topLeftCorner = [region.sw[0], region.ne[1]];
-    const topRightCorner = [region.ne[0], region.ne[1]];
-    const bottomLeftCorner = [region.sw[0], region.sw[1]];
-
-    const verticalLineString = geoUtils.makeLineString([
-      topLeftCorner,
-      bottomLeftCorner,
-    ]);
-
-    const horizontalLineString = geoUtils.makeLineString([
-      topLeftCorner,
-      topRightCorner,
-    ]);
-
-    const distVertical = geoUtils.calculateDistance(
-      topLeftCorner,
-      bottomLeftCorner,
-    );
-    const distHorizontal = geoUtils.calculateDistance(
-      topLeftCorner,
-      topRightCorner,
-    );
-
-    const verticalPoint = geoUtils.pointAlongLine(
-      verticalLineString,
-      distVertical * this.props.alignment[0],
-    );
-
-    const horizontalPoint = geoUtils.pointAlongLine(
-      horizontalLineString,
-      distHorizontal * this.props.alignment[1],
-    );
-
-    return [verticalPoint[0], horizontalPoint[1]];
-  }
-
   _getMaxBounds() {
     const bounds = this.props.maxBounds;
     if (!bounds || !bounds.ne || !bounds.sw) {
@@ -542,7 +529,7 @@ class Camera extends React.Component {
         ref="camera"
         followUserLocation={this.props.followUserLocation}
         followUserMode={this.props.followUserMode}
-        followUserPitch={this.props.followUserPitch}
+        followPitch={this.props.followPitch}
         followHeading={this.props.followHeading}
         followZoomLevel={this.props.followZoomLevel}
         stop={this._createStopConfig(props)}

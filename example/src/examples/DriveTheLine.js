@@ -3,6 +3,7 @@ import MapboxGL from '@react-native-mapbox-gl/maps';
 import {View, StyleSheet} from 'react-native';
 import {Button} from 'react-native-elements';
 import {lineString as makeLineString} from '@turf/helpers';
+import {point} from '@turf/helpers';
 
 import RouteSimulator from '../utils/RouteSimulator';
 import {directionsClient} from '../MapboxClient';
@@ -13,23 +14,21 @@ import BaseExamplePropTypes from './common/BaseExamplePropTypes';
 import Page from './common/Page';
 import PulseCircleLayer from './common/PulseCircleLayer';
 
-import {point} from '@turf/helpers';
-
 const SF_ZOO_COORDINATE = [-122.505412, 37.737463];
 
 const styles = StyleSheet.create({
+  button: {
+    backgroundColor: 'blue',
+    borderRadius: 3,
+  },
   buttonCnt: {
+    backgroundColor: 'transparent',
+    bottom: 16,
     flexDirection: 'row',
     justifyContent: 'space-around',
-    backgroundColor: 'transparent',
-    position: 'absolute',
-    bottom: 16,
     left: 0,
+    position: 'absolute',
     right: 0,
-  },
-  button: {
-    borderRadius: 3,
-    backgroundColor: 'blue',
   },
 });
 
@@ -73,7 +72,7 @@ class DriveTheLine extends React.Component {
 
   onStart() {
     const routeSimulator = new RouteSimulator(this.state.route);
-    routeSimulator.addListener(currentPoint => this.setState({currentPoint}));
+    routeSimulator.addListener((currentPoint) => this.setState({currentPoint}));
     routeSimulator.start();
     this.setState({routeSimulator});
   }
@@ -166,9 +165,7 @@ class DriveTheLine extends React.Component {
     const style = [layerStyles.origin, {circleColor: backgroundColor}];
 
     return (
-      <MapboxGL.ShapeSource
-        id="origin"
-        shape={point(SF_OFFICE_COORDINATE)}>
+      <MapboxGL.ShapeSource id="origin" shape={point(SF_OFFICE_COORDINATE)}>
         <MapboxGL.Animated.CircleLayer id="originInnerCircle" style={style} />
       </MapboxGL.ShapeSource>
     );
@@ -195,7 +192,7 @@ class DriveTheLine extends React.Component {
     return (
       <Page {...this.props}>
         <MapboxGL.MapView
-          ref={c => (this._map = c)}
+          ref={(c) => (this._map = c)}
           style={sheet.matchParent}
           styleURL={MapboxGL.StyleURL.Dark}>
           <MapboxGL.Camera

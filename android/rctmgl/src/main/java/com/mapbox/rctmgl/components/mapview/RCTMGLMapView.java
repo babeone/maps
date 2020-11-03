@@ -17,7 +17,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-
+import com.mapbox.mapboxsdk.log.Logger;
 
 import com.facebook.react.bridge.LifecycleEventListener;
 import com.facebook.react.bridge.ReactContext;
@@ -41,6 +41,7 @@ import com.mapbox.mapboxsdk.maps.MapboxMapOptions;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
 import com.mapbox.mapboxsdk.maps.UiSettings;
+import com.mapbox.mapboxsdk.plugins.localization.LocalizationPlugin;
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolClickListener;
 import com.mapbox.mapboxsdk.plugins.annotation.OnSymbolDragListener;
 import com.mapbox.mapboxsdk.plugins.annotation.Symbol;
@@ -56,6 +57,8 @@ import com.mapbox.rctmgl.components.annotation.MarkerView;
 import com.mapbox.rctmgl.components.annotation.MarkerViewManager;
 import com.mapbox.rctmgl.components.camera.RCTMGLCamera;
 import com.mapbox.rctmgl.components.images.RCTMGLImages;
+import com.mapbox.rctmgl.components.location.LocationComponentManager;
+import com.mapbox.rctmgl.components.location.RCTMGLNativeUserLocation;
 import com.mapbox.rctmgl.components.mapview.helpers.CameraChangeTracker;
 import com.mapbox.rctmgl.components.styles.layers.RCTLayer;
 import com.mapbox.rctmgl.components.styles.light.RCTMGLLight;
@@ -76,6 +79,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Locale;
 
 import javax.annotation.Nullable;
 
@@ -113,6 +117,8 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
 
     private MapboxMap mMap;
 
+    private LocalizationPlugin mLocalizationPlugin;
+
     private String mStyleURL;
 
     private Integer mPreferredFramesPerSecond;
@@ -141,6 +147,8 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
     private ViewGroup mOffscreenAnnotationViewContainer = null;
 
     private boolean mAnnotationClicked = false;
+
+    private LocationComponentManager mLocationComponentManager = null;
 
     public RCTMGLMapView(Context context, RCTMGLMapViewManager manager, MapboxMapOptions options) {
         super(context, options);
@@ -211,7 +219,9 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
             feature = (AbstractMapFeature) childView;
         } else if (childView instanceof RCTMGLLight) {
             feature = (AbstractMapFeature) childView;
-        } else if (childView instanceof RCTMGLPointAnnotation) {
+        } else if (childView instanceof RCTMGLNativeUserLocation) {
+            feature = (AbstractMapFeature) childView;
+        }  else if (childView instanceof RCTMGLPointAnnotation) {
             RCTMGLPointAnnotation annotation = (RCTMGLPointAnnotation) childView;
             mPointAnnotations.put(annotation.getID(), annotation);
             feature = (AbstractMapFeature) childView;
@@ -219,8 +229,7 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
             RCTMGLMarkerView marker = (RCTMGLMarkerView) childView;
             feature = (AbstractMapFeature) childView;
         } else if (childView instanceof RCTMGLCamera) {
-            RCTMGLCamera camera = (RCTMGLCamera) childView;
-            mCamera = camera;
+            mCamera = (RCTMGLCamera) childView;
             feature = (AbstractMapFeature) childView;
         } else if (childView instanceof RCTLayer) {
             feature = (RCTLayer) childView;
@@ -424,6 +433,7 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
                 createSymbolManager(style);
                 setUpImage(style);
                 addQueuedFeatures();
+                setupLocalization(style);
             }
         });
 
@@ -496,9 +506,12 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
             }
 
             @Override
-            // Left empty on purpose
             public void onAnnotationDrag(Symbol symbol) {
-
+                final long selectedMarkerID = symbol.getId();
+                RCTMGLPointAnnotation annotation = getPointAnnotationByMarkerID(selectedMarkerID);
+                if (annotation != null) {
+                    annotation.onDrag();
+                }
             }
 
             @Override
@@ -516,7 +529,7 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
     }
 
     public void addQueuedFeatures() {
-        if (mQueuedFeatures.size() > 0) {
+        if (mQueuedFeatures != null && mQueuedFeatures.size() > 0) {
             for (int i = 0; i < mQueuedFeatures.size(); i++) {
                 AbstractMapFeature feature = mQueuedFeatures.get(i);
                 feature.addToMap(this);
@@ -524,6 +537,18 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
             }
             mQueuedFeatures = null;
         }
+    }
+
+    private void setupLocalization(Style style) {
+      mLocalizationPlugin = new LocalizationPlugin(RCTMGLMapView.this, mMap, style);
+      if (mLocalizeLabels) {
+          try {
+              mLocalizationPlugin.matchMapLanguageWithDeviceDefault();
+          } catch (Exception e) {
+              final String localeString = Locale.getDefault().toString();
+              Logger.w(LOG_TAG, String.format("Could not find matching locale for %s", localeString));
+          }
+      }
     }
 
     @Override
@@ -975,6 +1000,14 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
         return mDestroyed;
     }
 
+    public void getStyle(Style.OnStyleLoaded onStyleLoaded) {
+        if (mMap == null) {
+            return;
+        }
+
+        mMap.getStyle(onStyleLoaded);
+    }
+
     private void updateUISettings() {
         if (mMap == null) {
             return;
@@ -1086,13 +1119,13 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
         setMaximumFps(mPreferredFramesPerSecond);
     }
 
-    private void updateInsets() {
-        if (mMap == null || mInsets == null) {
-            return;
+    public double[] getContentInset() {
+        if (mInsets == null) {
+            double[] result = {0,0,0,0};
+        
+            return result;
         }
-
-        final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
-        int top = 0, right = 0, bottom = 0, left = 0;
+        double top = 0, right = 0, bottom = 0, left = 0;
 
         if (mInsets.size() == 4) {
             top = mInsets.getInt(0);
@@ -1111,10 +1144,24 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
             left = top;
         }
 
-        mMap.setPadding(Float.valueOf(left * metrics.scaledDensity).intValue(),
-                Float.valueOf(top * metrics.scaledDensity).intValue(),
-                Float.valueOf(right * metrics.scaledDensity).intValue(),
-                Float.valueOf(bottom * metrics.scaledDensity).intValue());
+        final DisplayMetrics metrics = mContext.getResources().getDisplayMetrics();
+    
+        double[] result = {left * metrics.scaledDensity, top * metrics.scaledDensity, right * metrics.scaledDensity, bottom * metrics.scaledDensity};
+        return result;
+    }
+
+    private void updateInsets() {
+        if (mMap == null || mInsets == null) {
+            return;
+        }
+
+        double padding[] = getContentInset();
+        double top = padding[1], right = padding[2], bottom = padding[3], left = padding[0];
+
+        mMap.setPadding(Double.valueOf(left).intValue(),
+                Double.valueOf(top).intValue(),
+                Double.valueOf(right).intValue(),
+                Double.valueOf(bottom).intValue());
     }
 
     private void setLifecycleListeners() {
@@ -1142,10 +1189,13 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
 
     private WritableMap makeRegionPayload(Boolean isAnimated) {
         CameraPosition position = mMap.getCameraPosition();
+        if(position == null || position.target == null) {
+            return new WritableNativeMap();
+        }
         LatLng latLng = new LatLng(position.target.getLatitude(), position.target.getLongitude());
 
         WritableMap properties = new WritableNativeMap();
-        
+
         properties.putDouble("zoomLevel", position.zoom);
         properties.putDouble("heading", position.bearing);
         properties.putDouble("pitch", position.tilt);
@@ -1153,8 +1203,12 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
                 (null == isAnimated) ? mCameraChangeTracker.isAnimated() : isAnimated.booleanValue());
         properties.putBoolean("isUserInteraction", mCameraChangeTracker.isUserInteraction());
 
-        VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
-        properties.putArray("visibleBounds", GeoJSONUtils.fromLatLngBounds(visibleRegion.latLngBounds));
+        try {
+            VisibleRegion visibleRegion = mMap.getProjection().getVisibleRegion();
+            properties.putArray("visibleBounds", GeoJSONUtils.fromLatLngBounds(visibleRegion.latLngBounds));
+        } catch(Exception ex) {
+            Logger.e(LOG_TAG, String.format("An error occurred while attempting to make the region: %s", ex.getMessage()));
+        }
 
         return GeoJSONUtils.toPointFeature(latLng, properties);
     }
@@ -1162,7 +1216,7 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
     public void sendRegionChangeEvent(boolean isAnimated) {
         IEvent event = new MapChangeEvent(this, EventTypes.REGION_DID_CHANGE,
                 makeRegionPayload(new Boolean(isAnimated)));
-        
+
                 mManager.handleEvent(event);
         mCameraChangeTracker.setReason(CameraChangeTracker.EMPTY);
     }
@@ -1350,4 +1404,10 @@ public class RCTMGLMapView extends MapView implements OnMapReadyCallback, Mapbox
         return markerViewManager;
     }
 
+    public LocationComponentManager getLocationComponentManager() {
+        if (mLocationComponentManager == null) {
+            mLocationComponentManager = new LocationComponentManager(this, mContext);
+        }
+        return mLocationComponentManager;
+    }
 }

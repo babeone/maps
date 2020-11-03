@@ -18,6 +18,7 @@ class SetHeading extends React.Component {
       heading: 0,
       zoomLevel: 16,
       animationDuration: 150,
+      followUserLocation: true,
     };
 
     this._bearingOptions = [
@@ -31,6 +32,12 @@ class SetHeading extends React.Component {
 
   componentDidMount() {
     MapboxGL.locationManager.start();
+  }
+
+  componentDidUpdate() {
+    if (this.state.followUserLocation) {
+      this.setState({followUserLocation: false});
+    }
   }
 
   componentWillUnmount() {
@@ -48,9 +55,9 @@ class SetHeading extends React.Component {
         options={this._bearingOptions}
         onOptionPress={this.onHeadingChange}>
         <MapboxGL.MapView
-          ref={ref => (this.map = ref)}
+          ref={(ref) => (this.map = ref)}
           style={sheet.matchParent}>
-          <MapboxGL.Camera {...this.state} followUserLocation />
+          <MapboxGL.Camera {...this.state} />
           <MapboxGL.UserLocation />
         </MapboxGL.MapView>
       </TabBarPage>

@@ -16,10 +16,26 @@
 | tolerance | `number` | `none` | `false` | Specifies the Douglas-Peucker simplification tolerance.<br/>A greater value produces simpler geometries and improves performance.<br/>The default value is 0.375. |
 | onPress | `func` | `none` | `false` | Source press listener, gets called when a user presses one of the children layers only<br/>if that layer has a higher z-index than another source layers |
 | hitbox | `shape` | `none` | `false` | Overrides the default touch hitbox(44x44 pixels) for the source layers |
-| &nbsp;&nbsp;width | `number` | `none` | `true` | FIX ME NO DESCRIPTION |
-| &nbsp;&nbsp;height | `number` | `none` | `true` | FIX ME NO DESCRIPTION |
+| &nbsp;&nbsp;width | `number` | `none` | `true` | `width` of hitbox |
+| &nbsp;&nbsp;height | `number` | `none` | `true` | `height` of hitbox |
 
 ### methods
+#### features([filter])
+
+Returns all features from the source that match the query parameters regardless of whether or not the feature is<br/>currently rendered on the map.
+
+##### arguments
+| Name | Type | Required | Description  |
+| ---- | :--: | :------: | :----------: |
+| `filter` | `Array` | `No` | an optional filter statement to filter the returned Features. |
+
+
+
+```javascript
+shapeSource.features()
+```
+
+
 #### onPress(event)
 
 

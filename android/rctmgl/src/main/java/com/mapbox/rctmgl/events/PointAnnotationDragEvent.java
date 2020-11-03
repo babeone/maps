@@ -12,14 +12,40 @@ import com.mapbox.rctmgl.components.annotation.RCTMGLPointAnnotation;
 import com.mapbox.rctmgl.events.constants.EventKeys;
 import com.mapbox.rctmgl.events.constants.EventTypes;
 import com.mapbox.rctmgl.utils.ConvertUtils;
+import com.mapbox.rctmgl.utils.GeoJSONUtils;
 
 public class PointAnnotationDragEvent extends MapClickEvent {
-    public PointAnnotationDragEvent(View view, @NonNull LatLng latLng, @NonNull PointF screenPoint, String eventType) {
+    RCTMGLPointAnnotation mView;
+    private LatLng mTouchedLatLng;
+    private PointF mScreenPoint;
+
+    public PointAnnotationDragEvent(RCTMGLPointAnnotation view, @NonNull LatLng latLng, @NonNull PointF screenPoint, String eventType) {
         super(view, latLng, screenPoint, eventType);
+        mView = view;
+        mTouchedLatLng = latLng;
+        mScreenPoint = screenPoint;
     }
 
     @Override
     public String getKey() {
-        return getType().equals(EventTypes.ANNOTATION_DRAG_START) ? EventKeys.POINT_ANNOTATION_DRAG_START : EventKeys.POINT_ANNOTATION_DRAG_END;
+        String eventType = getType();
+
+        if (eventType.equals(EventTypes.ANNOTATION_DRAG_START)) {
+            return EventKeys.POINT_ANNOTATION_DRAG_START;
+        }
+        if (eventType.equals(EventTypes.ANNOTATION_DRAG_END)) {
+            return EventKeys.POINT_ANNOTATION_DRAG_END;
+        }
+
+        return EventKeys.POINT_ANNOTATION_DRAG;
+    }
+
+    @Override
+    public WritableMap getPayload() {
+        WritableMap properties = new WritableNativeMap();
+        properties.putString("id", mView.getID());
+        properties.putDouble("screenPointX", mScreenPoint.x);
+        properties.putDouble("screenPointY", mScreenPoint.y);
+        return GeoJSONUtils.toPointFeature(mTouchedLatLng, properties);
     }
 }

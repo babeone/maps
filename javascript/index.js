@@ -29,16 +29,19 @@ import locationManager from './modules/location/locationManager';
 import offlineManager from './modules/offline/offlineManager';
 import snapshotManager from './modules/snapshot/snapshotManager';
 import MarkerView from './components/MarkerView';
+import Animated from './utils/animated/Animated';
 import AnimatedMapPoint from './utils/animated/AnimatedPoint';
 import AnimatedShape from './utils/animated/AnimatedShape';
 import AnimatedCoordinatesArray from './utils/animated/AnimatedCoordinatesArray';
 import AnimatedExtractCoordinateFromArray from './utils/animated/AnimatedExtractCoordinateFromArray';
 import AnimatedRouteCoordinatesArray from './utils/animated/AnimatedRouteCoordinatesArray';
+import Style from './components/Style';
+import Logger from './utils/Logger';
 
 const MapboxGL = {...NativeModules.MGLModule};
 
 // static methods
-MapboxGL.requestAndroidLocationPermissions = async function() {
+MapboxGL.requestAndroidLocationPermissions = async function () {
   if (isAndroid()) {
     const res = await PermissionsAndroid.requestMultiple([
       PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
@@ -71,6 +74,7 @@ MapboxGL.PointAnnotation = PointAnnotation;
 MapboxGL.Callout = Callout;
 MapboxGL.UserLocation = UserLocation;
 MapboxGL.Camera = Camera;
+MapboxGL.Style = Style;
 
 // annotations
 MapboxGL.Annotation = Annotation;
@@ -98,36 +102,16 @@ MapboxGL.locationManager = locationManager;
 MapboxGL.offlineManager = offlineManager;
 MapboxGL.snapshotManager = snapshotManager;
 
+// animated
+MapboxGL.Animated = Animated;
+
 // utils
 MapboxGL.AnimatedPoint = AnimatedMapPoint;
 MapboxGL.AnimatedCoordinatesArray = AnimatedCoordinatesArray;
 MapboxGL.AnimatedExtractCoordinateFromArray = AnimatedExtractCoordinateFromArray;
 MapboxGL.AnimatedRouteCoordinatesArray = AnimatedRouteCoordinatesArray;
 MapboxGL.AnimatedShape = AnimatedShape;
-
-// animated
-const Animated = {
-  // sources
-  ShapeSource: RNAnimated.createAnimatedComponent(ShapeSource),
-  ImageSource: RNAnimated.createAnimatedComponent(ImageSource),
-
-  // layers
-  FillLayer: RNAnimated.createAnimatedComponent(FillLayer),
-  FillExtrusionLayer: RNAnimated.createAnimatedComponent(FillExtrusionLayer),
-  LineLayer: RNAnimated.createAnimatedComponent(LineLayer),
-  CircleLayer: RNAnimated.createAnimatedComponent(CircleLayer),
-  SymbolLayer: RNAnimated.createAnimatedComponent(SymbolLayer),
-  RasterLayer: RNAnimated.createAnimatedComponent(RasterLayer),
-  BackgroundLayer: RNAnimated.createAnimatedComponent(BackgroundLayer),
-
-  // values
-  CoordinatesArray: AnimatedCoordinatesArray,
-  RouteCoordinatesArray: AnimatedRouteCoordinatesArray,
-  Shape: AnimatedShape,
-  ExtractCoordinateFromArray : AnimatedExtractCoordinateFromArray, 
-};
-
-MapboxGL.Animated = Animated;
+MapboxGL.Logger = Logger;
 
 const {LineJoin} = MapboxGL;
 
@@ -161,6 +145,8 @@ export {
   AnimatedShape,
   Animated,
   LineJoin,
+  Logger,
+  Style,
 };
 
 export default MapboxGL;

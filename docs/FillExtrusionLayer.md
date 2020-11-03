@@ -5,7 +5,7 @@
 ### props
 | Prop | Type | Default | Required | Description |
 | ---- | :--: | :-----: | :------: | :----------: |
-| id | `string` | `none` | `false` | A string that uniquely identifies the source in the style to which it is added. |
+| id | `string` | `none` | `true` | A string that uniquely identifies the source in the style to which it is added. |
 | sourceID | `string` | `MapboxGL.StyleSource.DefaultSourceID` | `false` | The source from which to obtain the data to style. If the source has not yet been added to the current style, the behavior is undefined. |
 | sourceLayerID | `string` | `none` | `false` | Identifier of the layer within the source identified by the sourceID property from which the receiver obtains the data to style. |
 | aboveLayerID | `string` | `none` | `false` | Inserts a layer above aboveLayerID. |
@@ -70,6 +70,26 @@ The opacity of the entire fill extrusion layer. This is rendered on a perLayer, 
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`fillExtrusionOpacityTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s fillExtrusionOpacity propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -91,6 +111,26 @@ The base color of the extruded fill. The extrusion's surfaces will be shaded dif
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`fillExtrusionColorTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s fillExtrusionColor propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -112,6 +152,26 @@ The geometry's offset. Values are [x, y] where negatives indicate left and up (o
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`fillExtrusionTranslateTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s fillExtrusionTranslate propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -153,6 +213,26 @@ Name of image in sprite to use for drawing images on extruded fills. For seamles
 #### Expression
 
 Parameters: `zoom, feature`
+___
+
+#### Name
+
+`fillExtrusionPatternTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s fillExtrusionPattern propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -177,6 +257,26 @@ The height with which to extrude this layer.
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`fillExtrusionHeightTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s fillExtrusionHeight propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -204,4 +304,24 @@ The height with which to extrude the base of this layer. Must be less than or eq
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`fillExtrusionBaseTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s fillExtrusionBase propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 

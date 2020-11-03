@@ -5,7 +5,7 @@
 ### props
 | Prop | Type | Default | Required | Description |
 | ---- | :--: | :-----: | :------: | :----------: |
-| id | `string` | `none` | `false` | A string that uniquely identifies the source in the style to which it is added. |
+| id | `string` | `none` | `true` | A string that uniquely identifies the source in the style to which it is added. |
 | sourceID | `string` | `MapboxGL.StyleSource.DefaultSourceID` | `false` | The source from which to obtain the data to style.<br/>If the source has not yet been added to the current style, the behavior is undefined. |
 | sourceLayerID | `string` | `none` | `false` | Identifier of the layer within the source identified by the sourceID property<br/>from which the receiver obtains the data to style. |
 | aboveLayerID | `string` | `none` | `false` | Inserts a layer above aboveLayerID. |
@@ -68,6 +68,26 @@ Radius of influence of one heatmap point in pixels. Increasing the value makes t
 #### Expression
 
 Parameters: `zoom, feature, feature-state`
+___
+
+#### Name
+
+`heatmapRadiusTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s heatmapRadius propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -110,6 +130,26 @@ Similar to `heatmapWeight` but controls the intensity of the heatmap globally. P
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`heatmapIntensityTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s heatmapIntensity propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 
 ___
 
@@ -152,4 +192,24 @@ The global opacity at which the heatmap layer will be drawn.
 #### Expression
 
 Parameters: `zoom`
+___
+
+#### Name
+
+`heatmapOpacityTransition`
+
+#### Description
+
+The transition affecting any changes to this layer’s heatmapOpacity propery.
+
+#### Type
+
+`{ duration, delay }`
+
+#### Units
+`milliseconds`
+
+#### Default Value
+`{duration: 300, delay: 0}`
+
 

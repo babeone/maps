@@ -13,13 +13,13 @@ let clock = null;
 beforeAll(() => {
   clock = FakeTimers.install();
   clock._requestedAnimationFrames = [];
-  clock.requestAnimationFrame = callback => {
+  clock.requestAnimationFrame = (callback) => {
     clock._requestedAnimationFrames.push(callback);
   };
   clock.fireRequestAnimationFrames = () => {
     const oldRAF = clock._requestedAnimationFrames;
     clock._requestedAnimationFrames = [];
-    oldRAF.forEach(cb => cb(Date.now()));
+    oldRAF.forEach((cb) => cb(Date.now()));
   };
 });
 
@@ -32,22 +32,28 @@ const AnimatedShapeSource = Animated.createAnimatedComponent(ShapeSource);
 describe('AnimatedShapeSource', () => {
   test('testSetNativeProps', () => {
     AnimatedShapeSource.__skipSetNativeProps_FOR_TESTS_ONLY = false;
-    const coordinates = new AnimatedCoordinatesArray([[1, 1], [10, 10]]);
+    const coordinates = new AnimatedCoordinatesArray([
+      [1, 1],
+      [10, 10],
+    ]);
 
     let shapeSourceRef;
     // eslint-disable-next-line no-unused-vars
     const testRenderer = TestRenderer.create(
       <AnimatedShapeSource
         shape={new AnimatedShape({type: 'LineString', coordinates})}
-        ref={ref => (shapeSourceRef = ref)}
+        ref={(ref) => (shapeSourceRef = ref)}
       />,
     );
     const setNativeProps = jest.fn();
-    shapeSourceRef._component.refs.nativeSource.setNativeProps = setNativeProps;
+    shapeSourceRef._component._nativeRef.setNativeProps = setNativeProps;
 
     coordinates
       .timing({
-        toValue: [[21, 21], [30, 30]],
+        toValue: [
+          [21, 21],
+          [30, 30],
+        ],
         duration: 20,
         easing: Easing.linear,
         useNativeDriver: false,
@@ -85,11 +91,11 @@ describe('AnimatedShapeSource', () => {
     const testRenderer = TestRenderer.create(
       <AnimatedShapeSource
         shape={new AnimatedShape({type: 'LineString', coordinates})}
-        ref={ref => (shapeSourceRef = ref)}
+        ref={(ref) => (shapeSourceRef = ref)}
       />,
     );
     const setNativeProps = jest.fn();
-    shapeSourceRef._component.refs.nativeSource.setNativeProps = setNativeProps;
+    shapeSourceRef._component._nativeRef.setNativeProps = setNativeProps;
 
     coordinates
       .timing({
@@ -137,15 +143,18 @@ describe('AnimatedShapeSource', () => {
     const testRenderer = TestRenderer.create(
       <AnimatedShapeSource
         shape={new AnimatedShape({type: 'LineString', coordinates})}
-        ref={ref => (shapeSourceRef = ref)}
+        ref={(ref) => (shapeSourceRef = ref)}
       />,
     );
     const setNativeProps = jest.fn();
-    shapeSourceRef._component.refs.nativeSource.setNativeProps = setNativeProps;
+    shapeSourceRef._component._nativeRef.setNativeProps = setNativeProps;
 
     coordinates
       .timing({
-        toValue: [[21, 21], [30, 30]],
+        toValue: [
+          [21, 21],
+          [30, 30],
+        ],
         duration: 20,
         easing: Easing.linear,
         useNativeDriver: false,

@@ -8,7 +8,7 @@ However, if you prefer an easier ramp-up, then make sure to stick around and che
 ## Setting your accessToken
 
 In order to work, mapbox requires you to create an accessToken and set it in your app.
-If you haven't created on yet, make sure to sign up for an account [here](https://www.mapbox.com/signup/)
+If you haven't created one yet, make sure to sign up for an account [here](https://www.mapbox.com/signup/)
 You can create and manage your access tokens on your [Mapbox Account page](https://www.mapbox.com/account/)
 Once you have your accessToken, set it like this
 
@@ -27,7 +27,7 @@ Manually sets the connectivity state of the app, bypassing any checks to the Con
 ```js
 import MapboxGL from "@react-native-mapbox-gl/maps";
 
-MapboxGL.setConneced(true);
+MapboxGL.setConnected(true);
 ```
 
 ## Disabling Telemetry
